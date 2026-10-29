@@ -1,0 +1,1516 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111111" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Mandarin Listening Practice</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <style>
+    :root{
+      --bg:#f6f6f3; --card:#ffffff; --ink:#111111; --muted:#666;
+      --line:#deded7; --accent:#d7ff3e; --soft:#eef0e8; --danger:#b42318;
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    body{min-height:100vh;padding-bottom:118px}
+    button,select,input,textarea{font:inherit}
+    button{cursor:pointer}
+    .shell{max-width:980px;margin:0 auto;padding:14px}
+    header{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin:4px 0 12px}
+    h1{font-size:1.25rem;margin:0 0 4px}
+    .sub{color:var(--muted);font-size:.9rem}
+    .status{font-size:.78rem;color:var(--muted);text-align:right}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:0 1px 1px rgba(0,0,0,.02)}
+    .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;display:flex;gap:8px;align-items:center;max-width:220px}
+    .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .tab .name{overflow:hidden;text-overflow:ellipsis}
+    .tab .x{border:0;background:transparent;color:inherit;padding:0 0 0 2px;font-size:1rem}
+    .add-tab{border-style:dashed}
+    .grid{display:grid;grid-template-columns:1fr;gap:10px}
+    @media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}.settings-grid{grid-template-columns:repeat(4,1fr)}}
+    label.small{display:block;font-size:.78rem;color:var(--muted);margin-bottom:5px}
+    select,input[type="file"],textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px}
+    textarea{min-height:120px;resize:vertical}
+    .btnrow{display:flex;flex-wrap:wrap;gap:8px}
+    .btn{border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:12px;padding:10px 13px;font-weight:650}
+    .btn.primary{background:var(--ink);color:#fff}
+    .btn.accent{background:var(--accent);border-color:var(--ink)}
+    .btn.ghost{border-color:var(--line)}
+    .btn.danger{color:var(--danger);border-color:#f3b7b2}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .mode-switch{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .mode-switch button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;font-weight:700}
+    .mode-switch button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .toggle{display:flex;align-items:center;gap:8px;font-size:.9rem}
+    .toggle input{width:18px;height:18px}
+    .counter{font-size:.8rem;color:var(--muted);margin-bottom:7px}
+    .current-progress{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+    .current-progress .counter{margin-bottom:0}
+    .known-counter{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:14px;background:var(--soft);padding:5px 9px;font-size:.78rem;font-weight:700;color:#555;white-space:normal;line-height:1.35;flex-wrap:wrap}
+    .english{font-size:1.08rem;line-height:1.5;margin:6px 0 14px}
+    .chinese{font-size:2rem;line-height:1.35;font-weight:700;margin:4px 0 10px;letter-spacing:.01em}
+    .pinyin{font-size:1rem;color:var(--muted);line-height:1.5;margin:0 0 12px}
+    .translation-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .current-gap{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px}
+    .current-gap > div{min-width:170px;flex:1}
+    .notice{background:var(--soft);border-radius:12px;padding:10px;font-size:.85rem;color:#454545}
+    .notice.warn{background:#fff7e8}
+    .lesson-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding-right:2px}
+    .row{border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff}
+    .row.active{outline:2px solid var(--ink)}
+    .row-top{display:flex;gap:10px;align-items:flex-start}
+    .row-num{font-size:.75rem;color:var(--muted);min-width:28px;padding-top:3px}
+    .row-text{flex:1;min-width:0}
+    .row-en{font-size:.92rem;margin-bottom:4px}
+    .row-zh{font-size:1.2rem;font-weight:650;line-height:1.4}
+    .row-py{font-size:.82rem;color:var(--muted);margin-top:3px}
+    .row-controls{display:flex;align-items:end;gap:8px;margin-top:8px;flex-wrap:wrap}
+    .row-controls select{max-width:180px;padding:7px 9px}
+    .sticky{position:fixed;left:0;right:0;bottom:0;background:rgba(246,246,243,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:9px max(12px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));z-index:50}
+    .sticky-inner{max-width:980px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+    .sticky .btn{padding:10px 6px;font-size:.85rem}
+    .hidden{display:none!important}
+    .empty{text-align:center;padding:26px 12px;color:var(--muted)}
+    dialog{border:0;border-radius:18px;padding:0;max-width:520px;width:calc(100% - 28px);box-shadow:0 20px 70px rgba(0,0,0,.25)}
+    dialog::backdrop{background:rgba(0,0,0,.45)}
+    .dialog-body{padding:18px}
+    .replace-list{display:grid;gap:8px;margin:12px 0}
+    .replace-list button{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px}
+    .tiny{font-size:.76rem;color:var(--muted)}
+    .word-token{display:inline;border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;line-height:inherit;padding:0 2px;margin:0;border-radius:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .word-token:hover{background:#f1f2ec}
+    .word-token.marked{background:var(--accent);box-shadow:0 0 0 1px rgba(17,17,17,.12)}
+    .word-token:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+    .vocab-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;justify-content:space-between}
+    .vocab-toolbar .filter{min-width:190px;flex:1;max-width:330px}
+    .vocab-practice{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px;background:#fff}
+    .vocab-word{font-size:2.25rem;font-weight:800;line-height:1.2;margin:4px 0 8px}
+    .vocab-source-zh{font-size:1.35rem;font-weight:650;line-height:1.5;margin:8px 0}
+    .vocab-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:40vh;overflow:auto}
+    .vocab-row{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:9px;background:#fff;width:100%;text-align:left;color:inherit}
+    .vocab-row.active{outline:2px solid var(--ink)}
+    .vocab-row-word{font-size:1.2rem;font-weight:750;min-width:72px}
+    .vocab-row-context{flex:1;min-width:0;font-size:.86rem;color:var(--muted);line-height:1.4}
+    .count-pill{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:var(--accent);color:var(--ink);font-size:.75rem;font-weight:800}
+    .known-chinese{color:#999!important}
+    .row.known .row-zh,.row.known .row-zh .word-token{color:#999}
+    .row.known{background:#fafafa}
+    .known-badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#ececec;color:#707070;font-size:.72rem;font-weight:700}
+    .master-known{padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .auto-note{font-size:.78rem;color:var(--muted);line-height:1.4;margin-top:6px}
+    .show-only-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
+    .show-only-notice{font-size:.84rem;color:#454545;align-self:center;flex:1;min-width:220px}
+    .mode-badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#f0f0ec;color:#555;font-size:.72rem;font-weight:700}
+    .mode-badge.show-only{background:#ededed;color:#666}
+    .row.show-only{border-style:dashed}
+    .reading-actions{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
+    .reading-options{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .reading-general{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fafafa}
+    .reading-general-options{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .reading-status{font-size:.8rem;color:var(--muted);line-height:1.45;margin-top:8px}
+    .row-reading-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .study-counter-head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+    .study-count-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+    @media(min-width:650px){.study-count-grid{grid-template-columns:1fr 1fr}}
+    .study-count-box{border:1px solid var(--line);border-radius:13px;padding:10px;background:#fafafa}
+    .study-count-title{font-size:.76rem;color:var(--muted);margin-bottom:5px}
+    .study-count-values{font-size:.9rem;line-height:1.55;font-weight:650}
+    .reset-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+    .voice-variation-status{font-size:.78rem;color:var(--muted);line-height:1.4;margin-top:8px}
+    .vocab-meta-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+    @media(min-width:650px){.vocab-meta-grid{grid-template-columns:1fr 1fr 1fr}}
+    .vocab-add{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fafafa;margin-top:12px}
+    .vocab-add-grid{display:grid;grid-template-columns:1fr;gap:8px}
+    @media(min-width:650px){.vocab-add-grid{grid-template-columns:1fr 150px auto}}
+    .vocab-status-badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#efefec;color:#555;font-size:.72rem;font-weight:800;text-transform:capitalize}
+    .vocab-status-badge.learning{background:#fff0a8;color:#594b00}
+    .vocab-status-badge.familiar{background:#dff1df;color:#214d21}
+    .vocab-status-badge.known{background:#e7ecef;color:#3a4b55}
+    .vocab-difficult-badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#ffe3df;color:#7b2920;font-size:.72rem;font-weight:800}
+    .vocab-contexts{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+    .vocab-context{border-top:1px solid var(--line);padding-top:7px;font-size:.82rem;line-height:1.45;color:var(--muted)}
+    .vocab-row-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <h1>Mandarin Listening Practice</h1>
+        <div class="sub">10-lesson offline workspace · Mandarin listening · Mandarin reading · English review</div>
+      </div>
+      <div>
+        <div class="status" id="appStatus">Starting…</div>
+        <div class="status" id="wakeStatus">Screen awake: requesting…</div>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="tabs" id="lessonTabs"></div>
+    </section>
+
+    <section class="card" id="loadCard">
+      <div class="grid two">
+        <div>
+          <label class="small">Load TXT file(s) — up to 15 lessons total</label>
+          <input id="fileInput" type="file" accept=".txt,text/plain" multiple />
+          <div class="tiny" id="fileStatus" style="margin-top:6px">Your files stay on this device.</div>
+        </div>
+        <div>
+          <label class="small">Or paste a lesson</label>
+          <textarea id="pasteBox" placeholder="English sentence\n中文句子\nPinyin (optional)\n----------------------------------------"></textarea>
+          <div class="btnrow" style="margin-top:8px">
+            <button class="btn" id="loadPasteBtn">Load pasted text</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="workspace" class="hidden">
+      <section class="card">
+        <div class="mode-switch">
+          <button id="modeChinese">Mandarin listening</button>
+          <button id="modeReading">Mandarin reading</button>
+          <button id="modeEnglish">English review</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="settings-grid">
+          <div>
+            <label class="small">Listening: Chinese readings</label>
+            <select id="repeatCount">
+              <option value="1">Once</option>
+              <option value="2">Twice</option>
+            </select>
+          </div>
+          <div>
+            <label class="small">Listening: file default gap</label>
+            <select id="globalGap"></select>
+          </div>
+          <div>
+            <label class="small">Speech speed</label>
+            <select id="speechRate">
+              <option value="0.75">0.75</option>
+              <option value="0.85">0.85</option>
+              <option value="1" selected>1.00</option>
+              <option value="1.1">1.10</option>
+            </select>
+          </div>
+          <div>
+            <label class="small">Mandarin voice (fallback / single voice)</label>
+            <select id="voiceSelect"></select>
+          </div>
+        </div>
+        <div class="btnrow" style="margin-top:10px">
+          <label class="toggle"><input id="showEnglish" type="checkbox" checked /> Listening: keep English visible</label>
+          <label class="toggle"><input id="showPinyin" type="checkbox" checked /> Listening: show pinyin</label>
+          <label class="toggle"><input id="randomizeVoices" type="checkbox" checked /> Random local Mandarin voices</label>
+          <button class="btn ghost" id="testVoiceBtn">Test voice</button>
+          <button class="btn accent" id="toggleVocabBtn">Vocabulary &amp; Phrases <span class="count-pill" id="vocabCount">0</span></button>
+        </div>
+        <div id="voiceWarning" class="notice warn hidden" style="margin-top:10px"></div>
+        <div id="voiceVariationStatus" class="voice-variation-status"></div>
+        <div id="readingGeneralSettings" class="reading-general hidden">
+          <strong>Mandarin reading · general override</strong>
+          <div class="tiny">Individual reading choices are stored for every sentence. Turn on the override only when you want one set of choices to apply to the entire active lesson.</div>
+          <div class="reading-options">
+            <label class="toggle master-known"><input id="readingOverrideEnabled" type="checkbox" /> Override individual reading settings for this lesson</label>
+          </div>
+          <div class="reading-general-options" id="readingGeneralOptions">
+            <label class="toggle"><input id="readingGeneralEnglish" type="checkbox" /> Show English for all</label>
+            <label class="toggle"><input id="readingGeneralPinyin" type="checkbox" /> Show pinyin for all</label>
+            <label class="toggle"><input id="readingGeneralAuto" type="checkbox" /> Auto-advance all</label>
+          </div>
+          <div class="reading-status" id="readingGeneralStatus"></div>
+        </div>
+      </section>
+
+      <section class="card" id="studyCounterCard">
+        <div class="study-counter-head">
+          <div>
+            <strong>Study counter</strong>
+            <div class="tiny">Each completed sentence study counts once. A Mandarin sentence read twice in Listening still counts as one study.</div>
+          </div>
+          <label class="toggle"><input id="enableCounterReset" type="checkbox" /> Enable reset controls</label>
+        </div>
+        <div class="study-count-grid">
+          <div class="study-count-box">
+            <div class="study-count-title">Current sentence</div>
+            <div class="study-count-values" id="currentStudyCounts">Listening 0 · Reading 0 · Review 0 · Total 0</div>
+          </div>
+          <div class="study-count-box">
+            <div class="study-count-title">All study activity</div>
+            <div class="study-count-values" id="allStudyCounts">Listening 0 · Reading 0 · Review 0 · Total 0</div>
+          </div>
+        </div>
+        <div class="reset-actions hidden" id="counterResetActions">
+          <button class="btn danger" id="resetListeningCount" type="button">Reset Listening count</button>
+          <button class="btn danger" id="resetReadingCount" type="button">Reset Reading count</button>
+          <button class="btn danger" id="resetReviewCount" type="button">Reset Review count</button>
+          <button class="btn danger" id="resetAllCounts" type="button">Reset all counts</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="current-progress">
+          <div class="counter" id="counter"></div>
+          <div class="known-counter" id="knownCounter" aria-live="polite">Known: 0 / 0</div>
+        </div>
+        <div id="englishText" class="english"></div>
+        <div id="chineseText" class="chinese"></div>
+        <div id="pinyinText" class="pinyin"></div>
+
+        <div id="englishReviewActions" class="translation-actions hidden">
+          <button class="btn accent" id="revealChineseBtn">Show Chinese translation</button>
+          <button class="btn" id="listenHiddenMandarinBtn">▶ Listen to Mandarin · keep text hidden</button>
+          <button class="btn hidden" id="revealReviewPinyinBtn">Show pinyin</button>
+          <button class="btn hidden" id="readRevealedBtn">▶ Read shown Chinese aloud</button>
+          <button class="btn primary hidden" id="continueEnglishBtn">Continue to next sentence</button>
+        </div>
+
+        <div id="readingActions" class="reading-actions hidden">
+          <strong>Reading options for this sentence</strong>
+          <div class="reading-options">
+            <label class="toggle"><input id="readingSentenceEnglish" type="checkbox" /> Show English translation</label>
+            <label class="toggle"><input id="readingSentencePinyin" type="checkbox" /> Show pinyin transcription</label>
+            <label class="toggle"><input id="readingSentenceAuto" type="checkbox" /> Advance automatically</label>
+          </div>
+          <div class="btnrow" style="margin-top:10px">
+            <button class="btn accent" id="readingPlayOnceBtn" type="button">▶ Read Mandarin once</button>
+          </div>
+          <div class="reading-status" id="readingSentenceStatus"></div>
+        </div>
+
+        <div class="current-gap" id="listeningGapControls">
+          <div>
+            <label class="small">Listening gap for this sentence</label>
+            <select id="currentGap"></select>
+          </div>
+          <div class="tiny" id="effectiveGapLabel"></div>
+        </div>
+        <div class="btnrow" style="margin-top:10px">
+          <label class="toggle master-known"><input id="knownToggle" type="checkbox" /> <span id="knownToggleText">Known in Listening — skip this sentence</span></label>
+          <span class="known-badge hidden" id="knownBadge">Known in this mode · skipped</span>
+        </div>
+        <div class="auto-note">Listening gaps can be automatic or manually overridden. When Listening is set to Read twice, default/file-level gaps are extended by 1 second; manual per-sentence gap overrides stay exact. In Mandarin reading mode, automatic advance always uses the same character-length pattern and ignores listening gap overrides.</div>
+        <div class="notice" style="margin-top:10px">Tap a Chinese word to save it in <strong>Vocabulary &amp; Phrases</strong>. Saved vocabulary is global and remains on this device even if you remove the lesson. Remove an item only from the vocabulary panel.</div>
+      </section>
+
+      <section class="card hidden" id="vocabCard">
+        <div class="vocab-toolbar">
+          <div>
+            <strong>Vocabulary &amp; Phrases</strong>
+            <div class="tiny">A persistent learner vocabulary database. It survives lesson removal and device/browser restarts.</div>
+          </div>
+          <div class="filter">
+            <label class="small">Source lesson</label>
+            <select id="vocabFilter"></select>
+          </div>
+          <div class="filter">
+            <label class="small">Status</label>
+            <select id="vocabStatusFilter">
+              <option value="all">All statuses</option>
+              <option value="new">New</option>
+              <option value="learning">Learning</option>
+              <option value="familiar">Familiar</option>
+              <option value="known">Known</option>
+              <option value="difficult">Difficult only</option>
+            </select>
+          </div>
+          <div class="filter">
+            <label class="small">Type</label>
+            <select id="vocabTypeFilter">
+              <option value="all">Words + phrases</option>
+              <option value="word">Words</option>
+              <option value="phrase">Phrases</option>
+            </select>
+          </div>
+        </div>
+        <div class="vocab-add">
+          <strong>Add a word or phrase</strong>
+          <div class="tiny">Type Chinese below, or select Chinese text in the current sentence and use “Use selection”. The current sentence is saved as a context when available.</div>
+          <div class="vocab-add-grid" style="margin-top:8px">
+            <input id="vocabAddInput" type="text" placeholder="例如：没想到 / 担心" />
+            <select id="vocabAddType"><option value="word">Word</option><option value="phrase">Phrase</option></select>
+            <button class="btn accent" id="vocabAddBtn" type="button">Save</button>
+          </div>
+          <div class="btnrow" style="margin-top:8px"><button class="btn ghost" id="vocabUseSelectionBtn" type="button">Use selected Chinese text</button></div>
+        </div>
+        <div id="vocabEmpty" class="empty">Tap a Chinese word in a lesson, or add a word/phrase above.</div>
+        <div id="vocabContent" class="hidden">
+          <div class="vocab-practice">
+            <div class="counter" id="vocabCounter"></div>
+            <div class="vocab-word" id="vocabWord"></div>
+            <div class="btnrow" id="vocabBadges" style="margin:6px 0"></div>
+            <div class="vocab-meta-grid">
+              <div><label class="small">Learning status</label><select id="vocabStatus"><option value="new">New</option><option value="learning">Learning</option><option value="familiar">Familiar</option><option value="known">Known</option></select></div>
+              <div><label class="small">Item type</label><select id="vocabType"><option value="word">Word</option><option value="phrase">Phrase</option></select></div>
+              <div><label class="small">Difficulty flag</label><label class="toggle" style="margin-top:4px"><input id="vocabDifficult" type="checkbox" /> Difficult / needs attention</label></div>
+            </div>
+            <div class="english" id="vocabEnglish" style="margin-top:12px"></div>
+            <div class="vocab-source-zh" id="vocabChinese"></div>
+            <div class="pinyin" id="vocabPinyin"></div>
+            <div class="tiny" id="vocabSource"></div>
+            <div class="vocab-contexts" id="vocabContexts"></div>
+            <div class="btnrow" style="margin-top:12px">
+              <button class="btn" id="vocabPrevBtn">◀ Previous</button>
+              <button class="btn primary" id="playWordBtn">▶ Play item</button>
+              <button class="btn" id="playSourceBtn">▶ Play sentence</button>
+              <button class="btn" id="vocabNextBtn">Next ▶</button>
+              <button class="btn danger" id="removeWordBtn">Remove from vocabulary</button>
+            </div>
+          </div>
+          <div class="btnrow" style="margin-top:10px">
+            <button class="btn" id="exportVocabularyBtn">Export Vocabulary TXT</button>
+            <button class="btn" id="exportWordsBtn">Export Difficult Words TXT</button>
+            <button class="btn" id="exportRevisionBtn">Export revision sentences TXT</button>
+          </div>
+          <div class="vocab-list" id="vocabList"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="btnrow" style="justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div>
+            <strong id="lessonName"></strong>
+            <div class="tiny" id="lessonMeta"></div>
+            <div class="btnrow" style="margin-top:8px">
+              <label class="toggle master-known"><input id="allKnownToggle" type="checkbox" /> <span id="allKnownToggleText">Mark all Listening sentences known / skip</span></label>
+              <button class="btn ghost" id="allActiveBtn" type="button">Make all active</button>
+            </div>
+            <div class="tiny" id="allKnownStatus" style="margin-top:4px"></div>
+          </div>
+          <div class="btnrow">
+            <button class="btn ghost" id="toggleLessonListBtn" aria-expanded="true">Hide sentence list</button>
+            <button class="btn ghost" id="renameBtn">Rename</button>
+            <button class="btn danger" id="removeLessonBtn">Remove lesson</button>
+          </div>
+        </div>
+        <div class="lesson-list" id="lessonList"></div>
+      </section>
+    </div>
+
+    <section class="card" id="emptyCard">
+      <div class="empty">Load a TXT lesson to begin. Up to fifteen lessons can stay open and keep their own settings offline.</div>
+    </section>
+  </div>
+
+  <div class="sticky">
+    <div class="sticky-inner">
+      <button class="btn" id="prevBtn">◀ Prev</button>
+      <button class="btn primary" id="playBtn">▶ Start</button>
+      <button class="btn" id="pauseBtn">Ⅱ Pause</button>
+      <button class="btn" id="stopBtn">■ Stop</button>
+      <button class="btn" id="nextBtn">Next ▶</button>
+    </div>
+  </div>
+
+  <dialog id="replaceDialog">
+    <div class="dialog-body">
+      <h2 style="margin-top:0">Fifteen lessons are already open</h2>
+      <div class="sub">Choose the lesson you want to replace. Its saved sentence settings (mode-specific known/skip statuses, listening gaps and Mandarin-reading choices) will be removed from this workspace.</div>
+      <div class="replace-list" id="replaceList"></div>
+      <div class="btnrow"><button class="btn" id="cancelReplaceBtn">Cancel</button></div>
+    </div>
+  </dialog>
+
+<script>
+(() => {
+  'use strict';
+  const APP_VERSION = '5.12.3';
+  const MAX_LESSONS = 15;
+  const GAP_OPTIONS = [2,3,4,5,7,10];
+  const DB_NAME = 'mandarin-listening-workspace';
+  const DB_VERSION = 1;
+  const STORE = 'workspace';
+  const STATE_KEY = 'state';
+  const BACKUP_KEY = 'mandarin-listening-workspace-backup-v1';
+  let backupTimer = null;
+
+  const $ = id => document.getElementById(id);
+  const els = {
+    status:$('appStatus'), wakeStatus:$('wakeStatus'), tabs:$('lessonTabs'), fileInput:$('fileInput'), fileStatus:$('fileStatus'), pasteBox:$('pasteBox'), loadPaste:$('loadPasteBtn'),
+    workspace:$('workspace'), empty:$('emptyCard'), modeChinese:$('modeChinese'), modeReading:$('modeReading'), modeEnglish:$('modeEnglish'), repeatCount:$('repeatCount'), globalGap:$('globalGap'),
+    speechRate:$('speechRate'), voiceSelect:$('voiceSelect'), showEnglish:$('showEnglish'), showPinyin:$('showPinyin'), randomizeVoices:$('randomizeVoices'), testVoice:$('testVoiceBtn'), voiceWarning:$('voiceWarning'), voiceVariationStatus:$('voiceVariationStatus'), toggleVocab:$('toggleVocabBtn'), vocabCount:$('vocabCount'),
+    vocabCard:$('vocabCard'), vocabFilter:$('vocabFilter'), vocabStatusFilter:$('vocabStatusFilter'), vocabTypeFilter:$('vocabTypeFilter'), vocabEmpty:$('vocabEmpty'), vocabContent:$('vocabContent'), vocabCounter:$('vocabCounter'), vocabWord:$('vocabWord'), vocabBadges:$('vocabBadges'), vocabStatus:$('vocabStatus'), vocabType:$('vocabType'), vocabDifficult:$('vocabDifficult'), vocabEnglish:$('vocabEnglish'), vocabChinese:$('vocabChinese'), vocabPinyin:$('vocabPinyin'), vocabSource:$('vocabSource'), vocabContexts:$('vocabContexts'), vocabPrev:$('vocabPrevBtn'), vocabNext:$('vocabNextBtn'), playWord:$('playWordBtn'), playSource:$('playSourceBtn'), removeWord:$('removeWordBtn'), exportVocabulary:$('exportVocabularyBtn'), exportWords:$('exportWordsBtn'), exportRevision:$('exportRevisionBtn'), vocabList:$('vocabList'), vocabAddInput:$('vocabAddInput'), vocabAddType:$('vocabAddType'), vocabAdd:$('vocabAddBtn'), vocabUseSelection:$('vocabUseSelectionBtn'),
+    counter:$('counter'), knownCounter:$('knownCounter'), currentStudyCounts:$('currentStudyCounts'), allStudyCounts:$('allStudyCounts'), enableCounterReset:$('enableCounterReset'), counterResetActions:$('counterResetActions'), resetListeningCount:$('resetListeningCount'), resetReadingCount:$('resetReadingCount'), resetReviewCount:$('resetReviewCount'), resetAllCounts:$('resetAllCounts'), english:$('englishText'), chinese:$('chineseText'), pinyin:$('pinyinText'), englishActions:$('englishReviewActions'), revealChinese:$('revealChineseBtn'), listenHiddenMandarin:$('listenHiddenMandarinBtn'), revealReviewPinyin:$('revealReviewPinyinBtn'),
+    readRevealed:$('readRevealedBtn'), continueEnglish:$('continueEnglishBtn'), readingGeneralSettings:$('readingGeneralSettings'), readingOverrideEnabled:$('readingOverrideEnabled'), readingGeneralOptions:$('readingGeneralOptions'), readingGeneralEnglish:$('readingGeneralEnglish'), readingGeneralPinyin:$('readingGeneralPinyin'), readingGeneralAuto:$('readingGeneralAuto'), readingGeneralStatus:$('readingGeneralStatus'), readingActions:$('readingActions'), readingSentenceEnglish:$('readingSentenceEnglish'), readingSentencePinyin:$('readingSentencePinyin'), readingSentenceAuto:$('readingSentenceAuto'), readingPlayOnce:$('readingPlayOnceBtn'), readingSentenceStatus:$('readingSentenceStatus'), listeningGapControls:$('listeningGapControls'), currentGap:$('currentGap'), effectiveGap:$('effectiveGapLabel'), lessonName:$('lessonName'), lessonMeta:$('lessonMeta'),
+    knownToggle:$('knownToggle'), knownToggleText:$('knownToggleText'), knownBadge:$('knownBadge'), allKnownToggle:$('allKnownToggle'), allKnownToggleText:$('allKnownToggleText'), allActive:$('allActiveBtn'), allKnownStatus:$('allKnownStatus'), toggleLessonList:$('toggleLessonListBtn'), rename:$('renameBtn'), remove:$('removeLessonBtn'), list:$('lessonList'), prev:$('prevBtn'), play:$('playBtn'), pause:$('pauseBtn'), stop:$('stopBtn'), next:$('nextBtn'),
+    replaceDialog:$('replaceDialog'), replaceList:$('replaceList'), cancelReplace:$('cancelReplaceBtn')
+  };
+
+  let state = {
+    lessons: [], activeId: null, mode: 'chinese', repeatCount: 1, speechRate: 1, showEnglish: true, showPinyin: true, voiceURI: '',
+    difficultWords: [], vocabulary: [], vocabMigrationDone: false, vocabOpen: false, vocabFilter: 'all', vocabStatusFilter: 'all', vocabTypeFilter: 'all', vocabIndex: 0, randomizeVoices: true, studyHistory: {}
+  };
+  let db = null;
+  let voices = [];
+  let controller = { runId:0, playing:false, paused:false, pendingTimer:null, englishRevealed:false, reviewPinyinRevealed:false, reviewAudioPlayed:false, manualContinue:false, showOnlyEnglish:false, showOnlyPinyin:false, studyVisitSerial:0, studyCountedKey:'' };
+  let pendingReplacement = null;
+  let replaceResolver = null;
+  let screenWakeLock = null;
+  let lastRandomVoiceURI = '';
+  let lastRandomGender = '';
+  let counterResetUnlocked = false;
+
+  function uid(){ return 'lesson-' + Date.now() + '-' + Math.random().toString(36).slice(2,8); }
+  function hasChinese(s){ return /[\u3400-\u9fff]/.test(s); }
+  function cleanLine(s){ return s.replace(/^\uFEFF/, '').trim(); }
+  function isSeparator(s){ return /^[-=_]{3,}$/.test(s.replace(/\s/g,'')); }
+  function looksLikeHeader(s){ return /^(100\b|format\s*:|pattern\s+\d+\s*:|second set|third set|a continuous conversation|target patterns\s*:|new vocabulary focus\s*:|level\s*:|design principles\s*:|each lesson contains)/i.test(s.trim()); }
+
+  function parseLesson(text){
+    const raw = text.replace(/\r/g,'').split('\n');
+    const groups = [];
+    let buf = [];
+    const flush = () => { if(buf.length){ groups.push(buf); buf=[]; } };
+    for(const lineRaw of raw){
+      const line = cleanLine(lineRaw);
+      if(!line || isSeparator(line)){ flush(); continue; }
+      buf.push(line);
+    }
+    flush();
+
+    const out=[];
+    for(const g of groups){
+      if(g.length < 2) continue;
+      // Find a Chinese line, then use the immediately preceding line as English.
+      const zhIndex = g.findIndex(hasChinese);
+      if(zhIndex <= 0) continue;
+      const english = g[zhIndex-1];
+      const chinese = g[zhIndex];
+      if(looksLikeHeader(english) || looksLikeHeader(chinese)) continue;
+      let pinyin = '';
+      if(g[zhIndex+1] && !hasChinese(g[zhIndex+1]) && !looksLikeHeader(g[zhIndex+1])) pinyin = g[zhIndex+1];
+      out.push({ english, chinese, pinyin, gapOverride:null, knownListening:false, knownReading:false, knownReview:false, readingShowEnglish:false, readingShowPinyin:false, readingAutoAdvance:false });
+    }
+
+    // Fallback for tightly packed 2/3-line content without blank separators.
+    if(out.length === 0){
+      const lines = raw.map(cleanLine).filter(x => x && !isSeparator(x));
+      for(let i=0;i<lines.length;i++){
+        if(hasChinese(lines[i]) && i>0 && !hasChinese(lines[i-1]) && !looksLikeHeader(lines[i-1]) && !looksLikeHeader(lines[i])){
+          const english=lines[i-1], chinese=lines[i];
+          let pinyin='';
+          if(lines[i+1] && !hasChinese(lines[i+1]) && !looksLikeHeader(lines[i+1]) && /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/i.test(lines[i+1])) pinyin=lines[i+1];
+          out.push({english,chinese,pinyin,gapOverride:null,knownListening:false,knownReading:false,knownReview:false,readingShowEnglish:false,readingShowPinyin:false,readingAutoAdvance:false});
+        }
+      }
+    }
+    return out;
+  }
+
+  async function openDB(){
+    return new Promise((resolve,reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = () => { const d=req.result; if(!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  function loadLocalBackup(){
+    try{
+      const raw=localStorage.getItem(BACKUP_KEY);
+      if(!raw) return null;
+      const parsed=JSON.parse(raw);
+      return parsed && typeof parsed==='object' ? parsed : null;
+    }catch(e){ console.warn('Local backup unavailable',e); return null; }
+  }
+  function saveLocalBackupNow(){
+    try{ localStorage.setItem(BACKUP_KEY,JSON.stringify(state)); }
+    catch(e){ console.warn('Local backup could not be saved',e); }
+  }
+  function scheduleLocalBackup(){
+    if(backupTimer) clearTimeout(backupTimer);
+    backupTimer=setTimeout(()=>{ backupTimer=null; saveLocalBackupNow(); },750);
+  }
+  async function loadState(){
+    let loaded=null;
+    if(db){
+      loaded=await new Promise(resolve => {
+        try{
+          const tx=db.transaction(STORE,'readonly');
+          const req=tx.objectStore(STORE).get(STATE_KEY);
+          req.onsuccess=()=>resolve(req.result||null);
+          req.onerror=()=>resolve(null);
+        }catch(e){ resolve(null); }
+      });
+    }
+    if(!loaded) loaded=loadLocalBackup();
+    if(loaded) state={...state,...loaded};
+  }
+  function saveState(){
+    if(db){
+      try{
+        const tx=db.transaction(STORE,'readwrite');
+        tx.objectStore(STORE).put(state,STATE_KEY);
+      }catch(e){ console.warn('IndexedDB save failed',e); }
+    }
+    scheduleLocalBackup();
+  }
+
+  function activeLesson(){ return state.lessons.find(l=>l.id===state.activeId) || null; }
+  function sentence(){ const l=activeLesson(); return l?.sentences?.[l.currentIndex] || null; }
+  function chineseCharacterCount(s){ return ((s?.chinese||'').match(/[\u3400-\u9fff]/g)||[]).length; }
+  function autoGapForSentence(s){
+    const n=chineseCharacterCount(s);
+    if(n<=7) return 2;
+    if(n<=11) return 3;
+    if(n<=15) return 4;
+    if(n<=20) return 5;
+    if(n<=27) return 7;
+    return 10;
+  }
+  function effectiveGap(s=sentence(), l=activeLesson()){
+    if(GAP_OPTIONS.includes(Number(s?.gapOverride))) return Number(s.gapOverride);
+    if(l?.globalGap==='auto') return autoGapForSentence(s);
+    return GAP_OPTIONS.includes(Number(l?.globalGap)) ? Number(l.globalGap) : 2;
+  }
+  function listeningPlaybackGap(s=sentence(), l=activeLesson()){
+    const base=effectiveGap(s,l);
+    // In Listening + Read twice, default/file-level gaps get one extra second.
+    // A manual per-sentence override remains exact.
+    if(Number(state.repeatCount)===2 && s?.gapOverride==null) return base+1;
+    return base;
+  }
+  function knownMode(mode=state.mode){
+    if(mode==='chinese' || mode==='listening') return 'listening';
+    if(mode==='reading') return 'reading';
+    if(mode==='english' || mode==='review') return 'review';
+    return 'listening';
+  }
+  function knownModeLabel(mode=state.mode){
+    const m=knownMode(mode);
+    return m==='listening'?'Listening':m==='reading'?'Reading':'Review';
+  }
+  function knownField(mode=state.mode){
+    const m=knownMode(mode);
+    return m==='listening'?'knownListening':m==='reading'?'knownReading':'knownReview';
+  }
+  function isKnown(s,mode=state.mode){ return s?.[knownField(mode)]===true; }
+  function setKnown(s,value,mode=state.mode){ if(s) s[knownField(mode)]=value===true; }
+  function nextPlayableIndex(l,start,mode=state.mode){
+    if(!l) return -1;
+    for(let i=Math.max(0,start);i<l.sentences.length;i++) if(!isKnown(l.sentences[i],mode)) return i;
+    return -1;
+  }
+  function knownCount(l=activeLesson(),mode=state.mode){ return l ? l.sentences.reduce((n,s)=>n+(isKnown(s,mode)?1:0),0) : 0; }
+  function knownCounts(l=activeLesson()){
+    return {
+      listening:knownCount(l,'listening'),
+      reading:knownCount(l,'reading'),
+      review:knownCount(l,'review')
+    };
+  }
+  function effectiveReadingSetting(s=sentence(), l=activeLesson(), key='english'){
+    const map={english:['readingShowEnglish','readingGeneralEnglish'],pinyin:['readingShowPinyin','readingGeneralPinyin'],auto:['readingAutoAdvance','readingGeneralAuto']};
+    const pair=map[key]; if(!pair) return false;
+    if(l?.readingOverrideEnabled===true) return l?.[pair[1]]===true;
+    return s?.[pair[0]]===true;
+  }
+  function readingAutoSeconds(s=sentence()){ return autoGapForSentence(s); }
+
+  function returnLessonToFirst(l=activeLesson()){
+    if(!l || !l.sentences?.length) return;
+    l.currentIndex=0;
+    beginStudyVisit();
+    resetTemporaryReveals();
+    saveState();
+  }
+
+  async function requestScreenWakeLock(){
+    if(!els.wakeStatus) return;
+    if(!('wakeLock' in navigator)){
+      els.wakeStatus.textContent='Screen awake: not supported by this browser';
+      return;
+    }
+    if(document.visibilityState!=='visible'){
+      els.wakeStatus.textContent='Screen awake: resumes when app is visible';
+      return;
+    }
+    if(screenWakeLock && !screenWakeLock.released){
+      els.wakeStatus.textContent='Screen awake · active';
+      return;
+    }
+    try{
+      screenWakeLock=await navigator.wakeLock.request('screen');
+      els.wakeStatus.textContent='Screen awake · active';
+      screenWakeLock.addEventListener('release',()=>{
+        screenWakeLock=null;
+        els.wakeStatus.textContent=document.visibilityState==='visible'
+          ? 'Screen awake: tap to reactivate'
+          : 'Screen awake: resumes when app is visible';
+      });
+    }catch(e){
+      console.warn('Screen Wake Lock unavailable',e);
+      els.wakeStatus.textContent='Screen awake: tap to activate';
+    }
+  }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') requestScreenWakeLock();
+    else {
+      screenWakeLock=null;
+      if(els.wakeStatus) els.wakeStatus.textContent='Screen awake: resumes when app is visible';
+    }
+  });
+  document.addEventListener('pointerdown',()=>requestScreenWakeLock(),{passive:true});
+  document.addEventListener('keydown',()=>requestScreenWakeLock());
+
+  function resetTemporaryReveals(){
+    controller.englishRevealed=false;
+    controller.reviewPinyinRevealed=false;
+    controller.reviewAudioPlayed=false;
+    controller.showOnlyEnglish=false;
+    controller.showOnlyPinyin=false;
+  }
+
+  function studyKey(s){
+    if(!s) return '';
+    return `${(s.chinese||'').trim()}\u241F${(s.english||'').trim()}`;
+  }
+  function normalizeStudyHistory(){
+    if(!state.studyHistory || typeof state.studyHistory!=='object' || Array.isArray(state.studyHistory)) state.studyHistory={};
+    for(const [k,v] of Object.entries(state.studyHistory)){
+      if(!v || typeof v!=='object'){ delete state.studyHistory[k]; continue; }
+      v.listening=Math.max(0,Number(v.listening)||0);
+      v.reading=Math.max(0,Number(v.reading)||0);
+      v.review=Math.max(0,Number(v.review)||0);
+    }
+  }
+  function studyEntry(s,create=false){
+    normalizeStudyHistory();
+    const k=studyKey(s); if(!k) return {listening:0,reading:0,review:0};
+    if(!state.studyHistory[k] && create) state.studyHistory[k]={listening:0,reading:0,review:0};
+    return state.studyHistory[k] || {listening:0,reading:0,review:0};
+  }
+  function studyTotals(){
+    normalizeStudyHistory();
+    const t={listening:0,reading:0,review:0};
+    Object.values(state.studyHistory).forEach(v=>{ t.listening+=Number(v.listening)||0; t.reading+=Number(v.reading)||0; t.review+=Number(v.review)||0; });
+    t.total=t.listening+t.reading+t.review; return t;
+  }
+  function beginStudyVisit(){ controller.studyVisitSerial++; controller.studyCountedKey=''; }
+  function markStudiedOnce(s,mode){
+    if(!s || isKnown(s,mode) || !['listening','reading','review'].includes(mode)) return false;
+    const visitKey=`${controller.studyVisitSerial}|${studyKey(s)}|${mode}`;
+    if(controller.studyCountedKey===visitKey) return false;
+    const e=studyEntry(s,true); e[mode]=(Number(e[mode])||0)+1;
+    controller.studyCountedKey=visitKey;
+    saveState(); renderStudyCounters();
+    return true;
+  }
+  function renderStudyCounters(){
+    if(!els.currentStudyCounts || !els.allStudyCounts) return;
+    const e=studyEntry(sentence(),false);
+    const currentTotal=(e.listening||0)+(e.reading||0)+(e.review||0);
+    const t=studyTotals();
+    els.currentStudyCounts.textContent=`Listening ${e.listening||0} · Reading ${e.reading||0} · Review ${e.review||0} · Total ${currentTotal}`;
+    els.allStudyCounts.textContent=`Listening ${t.listening} · Reading ${t.reading} · Review ${t.review} · Total ${t.total}`;
+    els.counterResetActions?.classList.toggle('hidden',!counterResetUnlocked);
+    if(els.enableCounterReset) els.enableCounterReset.checked=counterResetUnlocked;
+  }
+  function resetStudyMode(mode){
+    const labels={listening:'Listening',reading:'Reading',review:'Review'};
+    if(!labels[mode]) return;
+    if(!confirm(`Reset the ${labels[mode]} study count across all sentences? This cannot be undone.`)) return;
+    normalizeStudyHistory();
+    Object.values(state.studyHistory).forEach(v=>{ v[mode]=0; });
+    Object.keys(state.studyHistory).forEach(k=>{ const v=state.studyHistory[k]; if(!(v.listening||v.reading||v.review)) delete state.studyHistory[k]; });
+    beginStudyVisit(); saveState(); renderStudyCounters();
+  }
+  function resetAllStudyCounts(){
+    if(!confirm('Reset ALL Listening, Reading and Review study counts? This cannot be undone.')) return;
+    state.studyHistory={}; beginStudyVisit(); saveState(); renderStudyCounters();
+  }
+
+  function vocabularyEntry(term){
+    term=(term||'').trim();
+    return (state.vocabulary||[]).find(x=>x.term===term) || null;
+  }
+  function isSavedVocabulary(term){ return !!vocabularyEntry(term); }
+  function sourceFor(lesson, sentenceObj, sentenceIndex){
+    return { lessonId:lesson.id, lessonName:lesson.name, sentenceIndex, english:sentenceObj.english, chinese:sentenceObj.chinese, pinyin:sentenceObj.pinyin||'' };
+  }
+  function sourceKey(src){ return `${src?.lessonId||''}|${src?.sentenceIndex??''}|${src?.chinese||''}`; }
+  function normalizeVocabulary(){
+    if(!Array.isArray(state.vocabulary)) state.vocabulary=[];
+    state.vocabulary=state.vocabulary.filter(x=>x&&typeof (x.term||x.word)==='string'&&(x.term||x.word).trim()).map(x=>({
+      term:(x.term||x.word).trim(),
+      type:x.type==='phrase'?'phrase':'word',
+      status:['new','learning','familiar','known'].includes(x.status)?x.status:'learning',
+      difficult:x.difficult===true,
+      createdAt:Number(x.createdAt)||Date.now(),
+      updatedAt:Number(x.updatedAt)||Number(x.createdAt)||Date.now(),
+      sources:Array.isArray(x.sources)?x.sources.filter(Boolean):(x.source?[x.source]:[])
+    }));
+    const byTerm=new Map();
+    state.vocabulary.forEach(x=>{
+      if(!byTerm.has(x.term)){ byTerm.set(x.term,x); return; }
+      const keep=byTerm.get(x.term); keep.difficult=keep.difficult||x.difficult;
+      const rank={new:0,learning:1,familiar:2,known:3}; if(rank[x.status]>rank[keep.status]) keep.status=x.status;
+      if(x.type==='phrase') keep.type='phrase';
+      const seen=new Set(keep.sources.map(sourceKey)); x.sources.forEach(src=>{ const k=sourceKey(src); if(!seen.has(k)){keep.sources.push(src);seen.add(k);} });
+    });
+    state.vocabulary=[...byTerm.values()];
+    if(state.vocabMigrationDone!==true && Array.isArray(state.difficultWords)){
+      state.difficultWords.forEach(old=>{
+        const term=(old?.word||'').trim(); if(!term) return;
+        let entry=state.vocabulary.find(x=>x.term===term);
+        if(!entry){ entry={term,type:'word',status:'learning',difficult:true,createdAt:Number(old.createdAt)||Date.now(),updatedAt:Date.now(),sources:[]}; state.vocabulary.push(entry); }
+        entry.difficult=true;
+        if(old.source){ const k=sourceKey(old.source); if(!entry.sources.some(src=>sourceKey(src)===k)) entry.sources.push(old.source); }
+      });
+      state.vocabMigrationDone=true;
+    }
+  }
+  function addVocabularyTerm(term, type='word', lesson=activeLesson(), sentenceObj=sentence(), sentenceIndex=lesson?.currentIndex||0, open=true){
+    term=(term||'').trim();
+    if(!term || !hasChinese(term)) return false;
+    normalizeVocabulary();
+    let entry=state.vocabulary.find(x=>x.term===term);
+    if(!entry){
+      entry={term,type:type==='phrase'?'phrase':'word',status:'learning',difficult:false,createdAt:Date.now(),updatedAt:Date.now(),sources:[]};
+      state.vocabulary.push(entry);
+    } else if(type==='phrase') entry.type='phrase';
+    if(lesson&&sentenceObj){
+      const src=sourceFor(lesson,sentenceObj,sentenceIndex);
+      const k=sourceKey(src);
+      if(!entry.sources.some(x=>sourceKey(x)===k)) entry.sources.push(src);
+    }
+    entry.updatedAt=Date.now();
+    state.vocabFilter='all'; state.vocabStatusFilter='all'; state.vocabTypeFilter='all';
+    const filtered=filteredVocabulary(true);
+    const idx=filtered.findIndex(x=>x.term===entry.term);
+    state.vocabIndex=idx>=0?idx:Math.max(0,state.vocabulary.indexOf(entry));
+    if(open) state.vocabOpen=true;
+    saveState(); render();
+    return true;
+  }
+  function removeVocabularyEntry(entry){
+    if(!entry) return;
+    normalizeVocabulary();
+    const idx=state.vocabulary.findIndex(x=>x.term===entry.term);
+    if(idx>=0) state.vocabulary.splice(idx,1);
+    state.vocabIndex=Math.max(0,state.vocabIndex-1);
+    saveState(); render();
+  }
+  function dropLessonVocabularySources(lessonId){
+    normalizeVocabulary();
+    state.vocabulary.forEach(entry=>{ entry.sources=(entry.sources||[]).filter(src=>src.lessonId!==lessonId); });
+  }
+
+  function segmentChinese(text){
+    const parts=[];
+    try{
+      if(typeof Intl!=='undefined' && Intl.Segmenter){
+        const seg=new Intl.Segmenter('zh',{granularity:'word'});
+        for(const x of seg.segment(text)) parts.push({text:x.segment, word:x.isWordLike!==false && hasChinese(x.segment)});
+        return parts;
+      }
+    }catch(e){}
+    for(const ch of text) parts.push({text:ch,word:hasChinese(ch)});
+    return parts;
+  }
+
+  function renderChineseInteractive(container, text, lesson, sentenceObj, sentenceIndex, compact=false){
+    container.innerHTML='';
+    segmentChinese(text).forEach(part=>{
+      if(!part.word){ container.appendChild(document.createTextNode(part.text)); return; }
+      const marked=isSavedVocabulary(part.text);
+      const b=document.createElement('button'); b.type='button'; b.className='word-token'+(marked?' marked':''); b.textContent=part.text;
+      b.title=marked?'Open saved vocabulary item':'Save to Vocabulary & Phrases';
+      b.setAttribute('aria-label',`${marked?'Open':'Save'} ${part.text} ${marked?'in':'to'} Vocabulary and Phrases`);
+      if(compact) b.style.padding='0 1px';
+      b.addEventListener('click',ev=>{
+        ev.stopPropagation();
+        if(marked){
+          state.vocabOpen=true; state.vocabFilter='all'; state.vocabStatusFilter='all'; state.vocabTypeFilter='all';
+          const items=filteredVocabulary(true); const idx=items.findIndex(x=>x.term===part.text); state.vocabIndex=Math.max(0,idx);
+          const existing=vocabularyEntry(part.text); if(existing && lesson&&sentenceObj){ const src=sourceFor(lesson,sentenceObj,sentenceIndex); if(!(existing.sources||[]).some(x=>sourceKey(x)===sourceKey(src))) existing.sources.push(src); }
+          saveState(); render(); setTimeout(()=>els.vocabCard.scrollIntoView({behavior:'smooth',block:'start'}),30);
+        } else addVocabularyTerm(part.text,'word',lesson,sentenceObj,sentenceIndex,true);
+      });
+      container.appendChild(b);
+    });
+  }
+
+  function sourceLessonNameFromSource(src){
+    if(!src) return 'No loaded source';
+    const current=state.lessons.find(l=>l.id===src.lessonId);
+    return current?.name || src.lessonName || 'Removed lesson';
+  }
+  function entryPrimarySource(entry){
+    const sources=Array.isArray(entry?.sources)?entry.sources:[];
+    if(state.vocabFilter && state.vocabFilter!=='all') return sources.find(x=>x.lessonId===state.vocabFilter)||sources[0]||null;
+    return sources[0]||null;
+  }
+  function filteredVocabulary(ignoreIndex=false){
+    normalizeVocabulary();
+    let all=[...state.vocabulary];
+    if(state.vocabFilter && state.vocabFilter!=='all') all=all.filter(x=>(x.sources||[]).some(src=>src.lessonId===state.vocabFilter));
+    if(state.vocabStatusFilter==='difficult') all=all.filter(x=>x.difficult===true);
+    else if(state.vocabStatusFilter && state.vocabStatusFilter!=='all') all=all.filter(x=>x.status===state.vocabStatusFilter);
+    if(state.vocabTypeFilter && state.vocabTypeFilter!=='all') all=all.filter(x=>x.type===state.vocabTypeFilter);
+    all.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0) || a.term.localeCompare(b.term,'zh'));
+    return all;
+  }
+  function populateVocabFilter(){
+    const old=state.vocabFilter||'all';
+    const sources=[]; const seen=new Set();
+    state.lessons.forEach(l=>{ if((state.vocabulary||[]).some(x=>(x.sources||[]).some(src=>src.lessonId===l.id))){ seen.add(l.id); sources.push({id:l.id,name:l.name}); } });
+    els.vocabFilter.innerHTML='';
+    const all=document.createElement('option'); all.value='all'; all.textContent='All loaded sources'; els.vocabFilter.appendChild(all);
+    sources.forEach(src=>{ const o=document.createElement('option'); o.value=src.id; o.textContent=src.name; els.vocabFilter.appendChild(o); });
+    state.vocabFilter=(old==='all'||seen.has(old))?old:'all';
+    els.vocabFilter.value=state.vocabFilter;
+  }
+  function renderVocabulary(){
+    normalizeVocabulary();
+    els.vocabCount.textContent=String(state.vocabulary.length);
+    els.vocabCard.classList.toggle('hidden',!state.vocabOpen);
+    if(!state.vocabOpen) return;
+    populateVocabFilter();
+    els.vocabStatusFilter.value=state.vocabStatusFilter||'all';
+    els.vocabTypeFilter.value=state.vocabTypeFilter||'all';
+    const items=filteredVocabulary();
+    if(state.vocabIndex>=items.length) state.vocabIndex=Math.max(0,items.length-1);
+    els.vocabEmpty.classList.toggle('hidden',items.length>0);
+    els.vocabContent.classList.toggle('hidden',items.length===0);
+    if(!items.length){ els.vocabList.innerHTML=''; return; }
+    const entry=items[state.vocabIndex];
+    const src=entryPrimarySource(entry);
+    els.vocabCounter.textContent=`Item ${state.vocabIndex+1} of ${items.length} · ${state.vocabulary.length} saved total`;
+    els.vocabWord.textContent=entry.term;
+    els.vocabBadges.innerHTML='';
+    const sb=document.createElement('span'); sb.className=`vocab-status-badge ${entry.status}`; sb.textContent=entry.status; els.vocabBadges.appendChild(sb);
+    if(entry.difficult){ const db=document.createElement('span'); db.className='vocab-difficult-badge'; db.textContent='Difficult'; els.vocabBadges.appendChild(db); }
+    els.vocabStatus.value=entry.status;
+    els.vocabType.value=entry.type;
+    els.vocabDifficult.checked=entry.difficult===true;
+    els.vocabEnglish.textContent=src?.english||'';
+    els.vocabChinese.textContent=src?.chinese||'';
+    els.vocabPinyin.textContent=src?.pinyin||'';
+    els.vocabPinyin.classList.toggle('hidden',!src?.pinyin);
+    els.vocabSource.textContent=src?`Context: ${sourceLessonNameFromSource(src)} · sentence ${(src.sentenceIndex??0)+1}`:'No source sentence is currently stored for this item.';
+    els.vocabContexts.innerHTML='';
+    const contexts=(entry.sources||[]).slice(0,5);
+    if(contexts.length>1){
+      contexts.forEach((c,i)=>{ const d=document.createElement('div'); d.className='vocab-context'; d.textContent=`${i+1}. ${sourceLessonNameFromSource(c)} · ${c.chinese||''}${c.english?` · ${c.english}`:''}`; els.vocabContexts.appendChild(d); });
+      if((entry.sources||[]).length>5){ const d=document.createElement('div'); d.className='tiny'; d.textContent=`+ ${(entry.sources||[]).length-5} more saved contexts`; els.vocabContexts.appendChild(d); }
+    }
+    els.vocabPrev.disabled=state.vocabIndex<=0; els.vocabNext.disabled=state.vocabIndex>=items.length-1;
+    els.playSource.disabled=!src?.chinese;
+    els.vocabList.innerHTML='';
+    items.forEach((x,i)=>{
+      const row=document.createElement('button'); row.type='button'; row.className='vocab-row'+(i===state.vocabIndex?' active':'');
+      const w=document.createElement('div'); w.className='vocab-row-word'; w.textContent=x.term;
+      const c=document.createElement('div'); c.className='vocab-row-context';
+      const ps=entryPrimarySource(x); c.textContent=ps?`${sourceLessonNameFromSource(ps)} · ${ps.english||ps.chinese||''}`:'Persistent item · no loaded lesson context';
+      const badges=document.createElement('div'); badges.className='vocab-row-badges';
+      const st=document.createElement('span'); st.className=`vocab-status-badge ${x.status}`; st.textContent=x.status; badges.appendChild(st);
+      const ty=document.createElement('span'); ty.className='vocab-status-badge'; ty.textContent=x.type; badges.appendChild(ty);
+      if(x.difficult){ const dd=document.createElement('span'); dd.className='vocab-difficult-badge'; dd.textContent='Difficult'; badges.appendChild(dd); }
+      c.appendChild(badges); row.append(w,c); row.addEventListener('click',()=>{ state.vocabIndex=i; saveState(); renderVocabulary(); });
+      els.vocabList.appendChild(row);
+    });
+  }
+
+  function downloadText(filename,text){
+    const blob=new Blob([text],{type:'text/plain;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function exportVocabulary(){
+    const items=filteredVocabulary(); if(!items.length) return alert('There are no vocabulary items in the current filter.');
+    const sep='----------------------------------------';
+    const body=items.map((x,i)=>{
+      const src=entryPrimarySource(x);
+      return [`${i+1}. ${x.term}`,`Type: ${x.type}`,`Status: ${x.status}`,`Difficult: ${x.difficult?'yes':'no'}`,`Saved contexts: ${(x.sources||[]).length}`,src?`Source lesson: ${sourceLessonNameFromSource(src)}`:'Source lesson: none',src?`English: ${src.english||''}`:'',src?`Chinese: ${src.chinese||''}`:'',src?`Pinyin: ${src.pinyin||''}`:'',sep].filter(Boolean).join('\n');
+    }).join('\n\n');
+    downloadText('Mandarin_Vocabulary_and_Phrases.txt',body+'\n');
+  }
+  function exportDifficultWords(){
+    normalizeVocabulary();
+    const base=filteredVocabulary().filter(x=>x.difficult===true); if(!base.length) return alert('There are no Difficult vocabulary items in the current filter.');
+    const sep='----------------------------------------';
+    const body=base.map((x,i)=>{ const src=entryPrimarySource(x); return [`${i+1}. ${x.term}`,`Type: ${x.type}`,`Status: ${x.status}`,src?`Source lesson: ${sourceLessonNameFromSource(src)}`:'Source lesson: none',src?`English: ${src.english||''}`:'',src?`Chinese: ${src.chinese||''}`:'',src?`Pinyin: ${src.pinyin||''}`:'',sep].filter(Boolean).join('\n'); }).join('\n\n');
+    downloadText('Mandarin_Difficult_Words.txt',body+'\n');
+  }
+  function exportRevisionSentences(){
+    const items=filteredVocabulary(); if(!items.length) return alert('There are no vocabulary items in the current filter.');
+    const sep='----------------------------------------'; const seen=new Set(); const blocks=[];
+    items.forEach(x=>{ (x.sources||[]).forEach(src=>{ const key=sourceKey(src); if(seen.has(key)) return; seen.add(key); blocks.push([src.english||'',src.chinese||'',src.pinyin||'',sep].filter((v,idx)=>idx!==2||v).join('\n')); }); });
+    if(!blocks.length) return alert('No saved source sentences are available for the current vocabulary filter.');
+    downloadText('Mandarin_Vocabulary_Revision_Lesson.txt',blocks.join('\n\n')+'\n');
+  }
+
+
+  function globalGapLabel(lesson,s=null){
+    if(lesson?.globalGap==='auto') return s ? `Automatic (${autoGapForSentence(s)}s for this sentence)` : 'Automatic by sentence length';
+    return `${Number(lesson?.globalGap)||2}s`;
+  }
+  function fillGapSelect(select, includeDefault=false, lesson=null, sentenceObj=null){
+    select.innerHTML='';
+    if(includeDefault){
+      const o=document.createElement('option');
+      o.value='default'; o.textContent=`Use file default (${globalGapLabel(lesson,sentenceObj)})`; select.appendChild(o);
+    }else{
+      const a=document.createElement('option'); a.value='auto'; a.textContent='Automatic by sentence length'; select.appendChild(a);
+    }
+    GAP_OPTIONS.forEach(g=>{ const o=document.createElement('option'); o.value=String(g); o.textContent=`${g} seconds`; select.appendChild(o); });
+  }
+
+  function renderTabs(){
+    els.tabs.innerHTML='';
+    state.lessons.forEach((l,idx)=>{
+      const b=document.createElement('div'); b.className='tab'+(l.id===state.activeId?' active':''); b.setAttribute('role','button'); b.tabIndex=0;
+      const name=document.createElement('span'); name.className='name'; name.textContent=`${idx+1}. ${l.name}`;
+      const x=document.createElement('button'); x.className='x'; x.type='button'; x.textContent='×'; x.title='Remove lesson';
+      x.addEventListener('click',ev=>{ev.stopPropagation(); removeLesson(l.id);});
+      b.append(name,x); b.addEventListener('click',()=>switchLesson(l.id)); b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();switchLesson(l.id);}}); els.tabs.appendChild(b);
+    });
+    const add=document.createElement('button'); add.className='tab add-tab'; add.type='button'; add.textContent=state.lessons.length<MAX_LESSONS?'+ Load lesson':`${MAX_LESSONS}/${MAX_LESSONS} lessons open`;
+    add.addEventListener('click',()=>{ els.fileInput.click(); }); els.tabs.appendChild(add);
+  }
+
+  function render(){
+    renderTabs();
+    const l=activeLesson();
+    const has=!!l;
+    els.workspace.classList.toggle('hidden',!has); els.empty.classList.toggle('hidden',has);
+    [els.prev,els.play,els.pause,els.stop,els.next].forEach(b=>b.disabled=!has);
+    if(!has) return;
+
+    els.modeChinese.classList.toggle('active',state.mode==='chinese');
+    els.modeReading.classList.toggle('active',state.mode==='reading');
+    els.modeEnglish.classList.toggle('active',state.mode==='english');
+    els.repeatCount.value=String(state.repeatCount);
+    els.speechRate.value=String(state.speechRate);
+    els.showEnglish.checked=state.showEnglish; els.showPinyin.checked=state.showPinyin; els.randomizeVoices.checked=state.randomizeVoices!==false;
+    fillGapSelect(els.globalGap,false,l); els.globalGap.value=String(l.globalGap??'auto');
+    const s=sentence();
+    const readingMode=state.mode==='reading';
+    els.readingGeneralSettings.classList.toggle('hidden',!readingMode);
+    els.readingOverrideEnabled.checked=l.readingOverrideEnabled===true;
+    els.readingGeneralEnglish.checked=l.readingGeneralEnglish===true;
+    els.readingGeneralPinyin.checked=l.readingGeneralPinyin===true;
+    els.readingGeneralAuto.checked=l.readingGeneralAuto===true;
+    [els.readingGeneralEnglish,els.readingGeneralPinyin,els.readingGeneralAuto].forEach(x=>x.disabled=l.readingOverrideEnabled!==true);
+    els.readingGeneralStatus.textContent=l.readingOverrideEnabled===true?'General override is active: the three settings above replace the individual reading choices for every sentence in this lesson.':'General override is off: each sentence uses its own saved reading choices.';
+    fillGapSelect(els.currentGap,true,l,s);
+    els.currentGap.value=s?.gapOverride==null?'default':String(s.gapOverride);
+    const shownGap=listeningPlaybackGap(s,l); const extra=(Number(state.repeatCount)===2 && s?.gapOverride==null)?' Read twice adds 1 second to default gaps.':''; els.effectiveGap.textContent=`Effective listening gap: ${shownGap} seconds. It is used in Mandarin Listening between repeated readings and before the next sentence.${extra}`;
+    els.listeningGapControls.classList.remove('hidden');
+    const kc=knownCount(l);
+    const kcs=knownCounts(l);
+    const activeKnownLabel=knownModeLabel();
+    els.knownToggle.checked=isKnown(s);
+    els.knownToggleText.textContent=`Known in ${activeKnownLabel} — skip this sentence`;
+    els.knownBadge.textContent=`Known in ${activeKnownLabel} · skipped in this mode`;
+    els.knownBadge.classList.toggle('hidden',!isKnown(s));
+    els.allKnownToggle.checked=kc===l.sentences.length && l.sentences.length>0;
+    els.allKnownToggle.indeterminate=kc>0 && kc<l.sentences.length;
+    els.allKnownToggleText.textContent=`Mark all ${activeKnownLabel} sentences known / skip`;
+    els.allKnownStatus.textContent=kc===0?`No sentences are marked known in ${activeKnownLabel}.`:kc===l.sentences.length?`All sentences are known in ${activeKnownLabel} and will be skipped in this mode.`:`${kc} of ${l.sentences.length} sentences are known in ${activeKnownLabel} and will be skipped in this mode.`;
+    const readingText=l.readingOverrideEnabled===true?'reading override active':'individual reading settings';
+    els.lessonName.textContent=l.name; els.lessonMeta.textContent=`${l.sentences.length} sentences · Known: Listening ${kcs.listening}, Reading ${kcs.reading}, Review ${kcs.review} · ${readingText} · listening default gap ${globalGapLabel(l)}`;
+    const listVisible=l.listVisible!==false;
+    els.list.classList.toggle('hidden',!listVisible);
+    els.toggleLessonList.textContent=listVisible?'Hide sentence list':'Show sentence list';
+    els.toggleLessonList.setAttribute('aria-expanded',String(listVisible));
+
+    renderCurrent(); renderList(); renderVocabulary(); renderStudyCounters(); updatePlayButtons();
+  }
+
+  function renderCurrent(){
+    const l=activeLesson(), s=sentence(); if(!l||!s) return;
+    els.counter.textContent=`Sentence ${l.currentIndex+1} of ${l.sentences.length}`;
+    const currentKnownCounts=knownCounts(l);
+    els.knownCounter.textContent=`Known · Listening ${currentKnownCounts.listening}/${l.sentences.length} · Reading ${currentKnownCounts.reading}/${l.sentences.length} · Review ${currentKnownCounts.review}/${l.sentences.length}`;
+    els.knownCounter.title="Known status is stored independently for Mandarin Listening, Mandarin Reading, and English Review. Only the current mode\'s Known status controls skipping.";
+    const englishMode=state.mode==='english';
+    const readingMode=state.mode==='reading';
+    renderChineseInteractive(els.chinese,s.chinese,l,s,l.currentIndex);
+    els.chinese.classList.toggle('known-chinese',isKnown(s));
+    els.english.textContent=s.english;
+    els.pinyin.textContent=s.pinyin||'';
+
+    if(englishMode){
+      els.english.classList.remove('hidden');
+      const reveal=controller.englishRevealed;
+      const heard=controller.reviewAudioPlayed;
+      const reviewInteracted=reveal || heard;
+      els.chinese.classList.toggle('hidden',!reveal);
+      // In Review mode pinyin is an independent reveal after either Chinese has been shown
+      // or the hidden Mandarin audio has been played. It always starts hidden on a new sentence.
+      els.pinyin.classList.toggle('hidden',!controller.reviewPinyinRevealed || !s.pinyin);
+      els.englishActions.classList.remove('hidden');
+      els.readingActions.classList.add('hidden');
+      els.revealChinese.textContent=reveal?'Hide Chinese translation':'Show Chinese translation';
+      els.listenHiddenMandarin.classList.toggle('hidden',reveal);
+      els.listenHiddenMandarin.textContent=heard?'▶ Listen again · keep text hidden':'▶ Listen to Mandarin · keep text hidden';
+      els.listenHiddenMandarin.disabled=isKnown(s);
+      els.revealReviewPinyin.classList.toggle('hidden',!reviewInteracted || !s.pinyin);
+      els.revealReviewPinyin.textContent=controller.reviewPinyinRevealed?'Hide pinyin':'Show pinyin';
+      els.readRevealed.classList.toggle('hidden',!reveal);
+      els.readRevealed.disabled=!reveal || isKnown(s);
+      els.continueEnglish.classList.toggle('hidden',!reviewInteracted);
+      return;
+    }
+
+    els.chinese.classList.remove('hidden');
+    els.englishActions.classList.add('hidden');
+    if(readingMode){
+      const showEn=effectiveReadingSetting(s,l,'english');
+      const showPy=effectiveReadingSetting(s,l,'pinyin');
+      const auto=effectiveReadingSetting(s,l,'auto');
+      els.english.classList.toggle('hidden',!showEn);
+      els.pinyin.classList.toggle('hidden',!showPy || !s.pinyin);
+      els.readingActions.classList.remove('hidden');
+      els.readingSentenceEnglish.checked=s.readingShowEnglish===true;
+      els.readingSentencePinyin.checked=s.readingShowPinyin===true;
+      els.readingSentenceAuto.checked=s.readingAutoAdvance===true;
+      [els.readingSentenceEnglish,els.readingSentencePinyin,els.readingSentenceAuto].forEach(x=>x.disabled=l.readingOverrideEnabled===true);
+      els.readingPlayOnce.disabled=auto || isKnown(s);
+      const source=l.readingOverrideEnabled===true?'general lesson override':'individual sentence setting';
+      els.readingSentenceStatus.textContent=auto
+        ? `Auto advance is ON via the ${source}. This sentence will remain visible for ${readingAutoSeconds(s)} seconds (based on ${chineseCharacterCount(s)} Chinese characters) after Auto advance is started. The Read Mandarin once button is disabled.`
+        : `Auto advance is OFF via the ${source}. Advance with Next ▶ manually. Read Mandarin once is available and reads the sentence one time with no gap and no automatic advance.`;
+    }else{
+      els.english.classList.toggle('hidden',!state.showEnglish);
+      els.pinyin.classList.toggle('hidden',!state.showPinyin || !s.pinyin);
+      els.readingActions.classList.add('hidden');
+    }
+  }
+
+  function renderList(){
+    const l=activeLesson(); if(!l) return;
+    if(l.listVisible===false){ els.list.innerHTML=''; return; }
+    els.list.innerHTML='';
+    const readingMode=state.mode==='reading';
+    l.sentences.forEach((s,i)=>{
+      const row=document.createElement('div'); row.className='row'+(i===l.currentIndex?' active':'')+(isKnown(s)?' known':''); row.dataset.index=i;
+      const readingControls=readingMode ? `<div class="row-reading-controls"><label class="toggle"><input class="reading-en-row" type="checkbox" /> English</label><label class="toggle"><input class="reading-py-row" type="checkbox" /> Pinyin</label><label class="toggle"><input class="reading-auto-row" type="checkbox" /> Auto advance</label></div>` : '';
+      row.innerHTML=`<div class="row-top"><div class="row-num">${i+1}</div><div class="row-text"><div class="row-en"></div><div class="row-zh"></div><div class="row-py"></div></div></div><div class="row-controls">${readingControls}<div><label class="small">Listening gap</label><select class="sentence-gap"></select></div><label class="toggle master-known"><input class="known-row-toggle" type="checkbox" /> Known in ${knownModeLabel()} · skip</label></div>`;
+      const en=row.querySelector('.row-en'); en.textContent=s.english;
+      renderChineseInteractive(row.querySelector('.row-zh'),s.chinese,l,s,i,true);
+      const py=row.querySelector('.row-py'); py.textContent=s.pinyin||'';
+      if(readingMode){
+        en.classList.toggle('hidden',!effectiveReadingSetting(s,l,'english'));
+        py.classList.toggle('hidden',!effectiveReadingSetting(s,l,'pinyin')||!s.pinyin);
+        const e=row.querySelector('.reading-en-row'), p=row.querySelector('.reading-py-row'), a=row.querySelector('.reading-auto-row');
+        e.checked=s.readingShowEnglish===true; p.checked=s.readingShowPinyin===true; a.checked=s.readingAutoAdvance===true;
+        [e,p,a].forEach(x=>x.disabled=l.readingOverrideEnabled===true);
+        e.addEventListener('change',ev=>{s.readingShowEnglish=ev.target.checked;saveState();render();});
+        p.addEventListener('change',ev=>{s.readingShowPinyin=ev.target.checked;saveState();render();});
+        a.addEventListener('change',ev=>{stopPlayback(false);s.readingAutoAdvance=ev.target.checked;saveState();render();});
+      }else{
+        en.classList.remove('hidden');
+        py.classList.toggle('hidden',!state.showPinyin||!s.pinyin);
+      }
+      const sel=row.querySelector('.sentence-gap'); fillGapSelect(sel,true,l,s); sel.value=s.gapOverride==null?'default':String(s.gapOverride);
+      sel.addEventListener('change',ev=>{ s.gapOverride=ev.target.value==='default'?null:Number(ev.target.value); saveState(); if(i===l.currentIndex){ render(); } });
+      const kt=row.querySelector('.known-row-toggle'); kt.checked=isKnown(s); kt.addEventListener('change',ev=>{ setKnown(s,ev.target.checked); saveState(); render(); });
+      row.addEventListener('click',ev=>{ if(['SELECT','OPTION','BUTTON','INPUT','LABEL'].includes(ev.target.tagName)) return; stopPlayback(false); l.currentIndex=i; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); scrollCurrentIntoView(); });
+      els.list.appendChild(row);
+    });
+  }
+
+  function scrollCurrentIntoView(){ setTimeout(()=>{ const r=els.list.querySelector('.row.active'); r?.scrollIntoView({block:'nearest',behavior:'smooth'}); },30); }
+
+  async function addLessonFromText(name,text){
+    const sentences=parseLesson(text);
+    if(!sentences.length) throw new Error('No English–Chinese sentence pairs were detected.');
+    const lesson={ id:uid(), name:name||'Untitled lesson', sentences, globalGap:'auto', currentIndex:0, listVisible:true, readingOverrideEnabled:false, readingGeneralEnglish:false, readingGeneralPinyin:false, readingGeneralAuto:false };
+    if(state.lessons.length < MAX_LESSONS){
+      state.lessons.push(lesson); state.activeId=lesson.id; saveState(); render(); return true;
+    }
+    return await requestReplacement(lesson);
+  }
+
+  function requestReplacement(lesson){
+    pendingReplacement=lesson;
+    els.replaceList.innerHTML='';
+    state.lessons.forEach((l,i)=>{
+      const b=document.createElement('button'); b.textContent=`Replace ${i+1}. ${l.name}`;
+      b.addEventListener('click',()=>{
+        const idx=state.lessons.findIndex(x=>x.id===l.id);
+        dropLessonVocabularySources(l.id);
+        state.lessons[idx]=pendingReplacement; state.activeId=pendingReplacement.id;
+        pendingReplacement=null; els.replaceDialog.close(); saveState(); render();
+        if(replaceResolver){ const r=replaceResolver; replaceResolver=null; r(true); }
+      });
+      els.replaceList.appendChild(b);
+    });
+    els.replaceDialog.showModal();
+    return new Promise(resolve=>{ replaceResolver=resolve; });
+  }
+
+  function switchLesson(id){ stopPlayback(false); state.activeId=id; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); }
+  function removeLesson(id){
+    const l=state.lessons.find(x=>x.id===id); if(!l) return;
+    if(!confirm(`Remove “${l.name}” from the workspace? Its saved sentence settings will also be removed.`)) return;
+    stopPlayback(false); dropLessonVocabularySources(id); const idx=state.lessons.findIndex(x=>x.id===id); state.lessons.splice(idx,1);
+    if(state.activeId===id) state.activeId=state.lessons[Math.min(idx,state.lessons.length-1)]?.id||null;
+    saveState(); render();
+  }
+
+  function mandarinVoices(){ return voices.filter(v=>/^zh([_-]|$)/i.test(v.lang)); }
+  function localMandarinVoices(){ return mandarinVoices().filter(v=>v.localService===true); }
+  function inferredVoiceGender(v){
+    const n=(v?.name||'').toLowerCase().replace(/[\s_-]+/g,'');
+    const female=['female','tingting','meijia','xiaoxiao','xiaoyi','xiaohan','xiaomo','xiaorui','xiaoshuang','xiaoqiu','xiaozhen','xiaoyan','xiaoyou','yaoyao','huihui','lili','xiaomeng','xiaobei'];
+    const male=['male','yunxi','yunyang','yunfeng','yunjian','yunhao','yunye','kangkang','lichao','yunze','yunxia'];
+    if(female.some(x=>n.includes(x))) return 'female';
+    if(male.some(x=>n.includes(x))) return 'male';
+    return 'unknown';
+  }
+  function populateVoices(){
+    voices=speechSynthesis.getVoices();
+    const zh=mandarinVoices();
+    const list=(zh.length?zh:voices).slice().sort((a,b)=>(Number(b.localService)-Number(a.localService)) || a.name.localeCompare(b.name));
+    els.voiceSelect.innerHTML='';
+    list.forEach(v=>{ const o=document.createElement('option'); o.value=v.voiceURI; o.textContent=`${v.name} — ${v.lang}${v.localService?' · local':''}`; els.voiceSelect.appendChild(o); });
+    if(state.voiceURI && list.some(v=>v.voiceURI===state.voiceURI)) els.voiceSelect.value=state.voiceURI;
+    else if(list[0]){ state.voiceURI=list[0].voiceURI; els.voiceSelect.value=state.voiceURI; saveState(); }
+    const local=localMandarinVoices();
+    const female=local.filter(v=>inferredVoiceGender(v)==='female').length;
+    const male=local.filter(v=>inferredVoiceGender(v)==='male').length;
+    if(els.voiceVariationStatus){
+      if(state.randomizeVoices===false) els.voiceVariationStatus.textContent='Voice variation is off. The selected Mandarin voice is used for all speech.';
+      else if(local.length>=2 && male>0 && female>0) els.voiceVariationStatus.textContent=`Random offline voice variation is active: ${local.length} local Mandarin voices found (${female} recognized female, ${male} recognized male). The app alternates recognized gender groups and randomizes within them.`;
+      else if(local.length>=2) els.voiceVariationStatus.textContent=`Random offline voice variation is active using ${local.length} local Mandarin voices. Browser voice metadata does not reliably identify gender, so male/female alternation cannot be guaranteed on this device.`;
+      else if(local.length===1) els.voiceVariationStatus.textContent='Only one local Mandarin voice is available, so offline voice variation is not possible on this device.';
+      else els.voiceVariationStatus.textContent='No local Mandarin voice is reported by this browser. Random offline voice variation is unavailable until a Mandarin system voice is installed.';
+    }
+    if(!zh.length){ els.voiceWarning.textContent='No Mandarin-specific voice was found. Install Chinese/Mandarin system voices for reliable pronunciation and offline use.'; els.voiceWarning.classList.remove('hidden'); }
+    else if(state.randomizeVoices!==false && local.length===0){ els.voiceWarning.textContent='Mandarin voices were found, but none are reported as local/offline. Speech may require an internet connection until a system Mandarin voice is installed.'; els.voiceWarning.classList.remove('hidden'); }
+    else{
+      const selected=list.find(v=>v.voiceURI===els.voiceSelect.value);
+      if(state.randomizeVoices===false && selected && !selected.localService){ els.voiceWarning.textContent='The selected Mandarin voice may rely on an online service. For reliable offline speech, choose a voice marked “local” if available.'; els.voiceWarning.classList.remove('hidden'); }
+      else els.voiceWarning.classList.add('hidden');
+    }
+  }
+  function selectedVoice(){ return voices.find(v=>v.voiceURI===state.voiceURI) || localMandarinVoices()[0] || mandarinVoices()[0] || null; }
+  function chooseSpeechVoice(){
+    if(state.randomizeVoices===false) return selectedVoice();
+    const local=localMandarinVoices();
+    if(!local.length) return selectedVoice();
+    let pool=local.slice();
+    const male=pool.filter(v=>inferredVoiceGender(v)==='male');
+    const female=pool.filter(v=>inferredVoiceGender(v)==='female');
+    if(male.length && female.length){
+      const target=lastRandomGender==='male'?'female':lastRandomGender==='female'?'male':(Math.random()<.5?'male':'female');
+      pool=target==='male'?male:female;
+    }
+    if(pool.length>1 && lastRandomVoiceURI) pool=pool.filter(v=>v.voiceURI!==lastRandomVoiceURI) || pool;
+    const chosen=pool[Math.floor(Math.random()*pool.length)] || local[0];
+    lastRandomVoiceURI=chosen.voiceURI;
+    const g=inferredVoiceGender(chosen); if(g!=='unknown') lastRandomGender=g;
+    return chosen;
+  }
+
+  function speak(text,runId,voiceOverride=null){
+    return new Promise((resolve,reject)=>{
+      if(runId!==controller.runId) return resolve('cancelled');
+      const u=new SpeechSynthesisUtterance(text); u.lang='zh-CN'; u.rate=Number(state.speechRate)||1;
+      const v=voiceOverride || chooseSpeechVoice(); if(v) u.voice=v;
+      u.onend=()=>resolve('ended'); u.onerror=e=>{ if(e.error==='canceled'||e.error==='interrupted') resolve('cancelled'); else reject(e); };
+      speechSynthesis.speak(u);
+    });
+  }
+  function waitSeconds(sec,runId){
+    return new Promise(resolve=>{
+      if(runId!==controller.runId) return resolve('cancelled');
+      let remaining=Math.max(0,sec*1000);
+      let last=performance.now();
+      const tick=()=>{
+        if(runId!==controller.runId){ controller.pendingTimer=null; return resolve('cancelled'); }
+        const now=performance.now();
+        if(!controller.paused) remaining -= (now-last);
+        last=now;
+        if(remaining<=0){ controller.pendingTimer=null; return resolve('ended'); }
+        controller.pendingTimer=setTimeout(tick,100);
+      };
+      controller.pendingTimer=setTimeout(tick,100);
+    });
+  }
+
+  async function playChineseLoop(){
+    if(!activeLesson()) return;
+    stopPlayback(false); controller.playing=true; controller.paused=false; const runId=++controller.runId; updatePlayButtons();
+    const l=activeLesson();
+    try{
+      while(controller.playing && runId===controller.runId && l.currentIndex<l.sentences.length){
+        const playable=nextPlayableIndex(l,l.currentIndex);
+        if(playable<0){ controller.playing=false; returnLessonToFirst(l); break; }
+        if(playable!==l.currentIndex){ l.currentIndex=playable; controller.englishRevealed=false; saveState(); }
+        const s=l.sentences[l.currentIndex]; resetTemporaryReveals(); render(); scrollCurrentIntoView();
+        const gap=listeningPlaybackGap(s,l);
+        const sentenceVoice=chooseSpeechVoice();
+        const times=Number(state.repeatCount)||1;
+        for(let n=0;n<times;n++){
+          const r=await speak(s.chinese,runId,sentenceVoice); if(r==='cancelled'||runId!==controller.runId) return;
+          if(n<times-1){ const w=await waitSeconds(gap,runId); if(w==='cancelled') return; }
+        }
+        markStudiedOnce(s,'listening');
+        const w=await waitSeconds(gap,runId); if(w==='cancelled') return;
+        const next=nextPlayableIndex(l,l.currentIndex+1);
+        if(next>=0){ l.currentIndex=next; beginStudyVisit(); resetTemporaryReveals(); saveState(); }
+        else{ controller.playing=false; returnLessonToFirst(l); break; }
+      }
+    }catch(e){ console.error(e); alert('Speech could not continue. Try another Mandarin voice.'); }
+    controller.playing=false; updatePlayButtons(); render();
+  }
+
+  async function playReadingLoop(){
+    if(!activeLesson()) return;
+    const l=activeLesson();
+    const s0=sentence();
+    if(!s0 || !effectiveReadingSetting(s0,l,'auto')){ render(); return; }
+    stopPlayback(false); controller.playing=true; controller.paused=false; const runId=++controller.runId; updatePlayButtons();
+    while(controller.playing && runId===controller.runId && l.currentIndex<l.sentences.length){
+      const playable=nextPlayableIndex(l,l.currentIndex);
+      if(playable<0){ controller.playing=false; returnLessonToFirst(l); break; }
+      if(playable!==l.currentIndex){ l.currentIndex=playable; saveState(); }
+      const s=l.sentences[l.currentIndex];
+      if(!effectiveReadingSetting(s,l,'auto')){ controller.playing=false; break; }
+      render(); scrollCurrentIntoView();
+      const w=await waitSeconds(readingAutoSeconds(s),runId); if(w==='cancelled') return;
+      markStudiedOnce(s,'reading');
+      const next=nextPlayableIndex(l,l.currentIndex+1);
+      if(next>=0){ l.currentIndex=next; beginStudyVisit(); resetTemporaryReveals(); saveState(); }
+      else{ controller.playing=false; returnLessonToFirst(l); break; }
+    }
+    controller.playing=false; updatePlayButtons(); render();
+  }
+
+  async function playEnglishReview(){
+    if(!activeLesson()) return;
+    stopPlayback(false);
+    controller.playing=true; controller.paused=false; controller.englishRevealed=false; controller.reviewPinyinRevealed=false; controller.reviewAudioPlayed=false; controller.manualContinue=false;
+    const runId=++controller.runId; updatePlayButtons();
+    const l=activeLesson();
+    while(controller.playing && runId===controller.runId && l.currentIndex<l.sentences.length){
+      const playable=nextPlayableIndex(l,l.currentIndex);
+      if(playable<0){ controller.playing=false; returnLessonToFirst(l); break; }
+      if(playable!==l.currentIndex){ l.currentIndex=playable; saveState(); }
+      controller.englishRevealed=false; controller.reviewPinyinRevealed=false; controller.reviewAudioPlayed=false; controller.manualContinue=false;
+      const startIndex=l.currentIndex;
+      render(); scrollCurrentIntoView();
+      let remaining=5000, last=performance.now();
+      while(controller.playing && runId===controller.runId && l.currentIndex===startIndex){
+        const now=performance.now();
+        if(!controller.paused && !controller.englishRevealed && !controller.reviewAudioPlayed) remaining -= (now-last);
+        last=now;
+        if(controller.manualContinue || remaining<=0) break;
+        await new Promise(r=>setTimeout(r,100));
+      }
+      if(runId!==controller.runId || !controller.playing) return;
+      if(l.currentIndex!==startIndex) continue;
+      const continuedManually=controller.manualContinue;
+      if(!continuedManually && remaining<=0) markStudiedOnce(l.sentences[startIndex],'review');
+      controller.manualContinue=false; controller.englishRevealed=false; controller.reviewPinyinRevealed=false; controller.reviewAudioPlayed=false;
+      const next=nextPlayableIndex(l,l.currentIndex+1);
+      if(next>=0){ l.currentIndex=next; beginStudyVisit(); saveState(); }
+      else { controller.playing=false; returnLessonToFirst(l); break; }
+    }
+    controller.playing=false; updatePlayButtons(); render();
+  }
+
+  function startPlayback(){ beginStudyVisit(); if(state.mode==='chinese') playChineseLoop(); else if(state.mode==='reading') playReadingLoop(); else playEnglishReview(); }
+  function stopPlayback(renderAfter=true){
+    controller.playing=false; controller.paused=false; controller.manualContinue=false; resetTemporaryReveals(); controller.runId++;
+    if(controller.pendingTimer){ clearTimeout(controller.pendingTimer); controller.pendingTimer=null; }
+    speechSynthesis.cancel(); updatePlayButtons(); if(renderAfter) render();
+  }
+  function togglePause(){
+    if(!controller.playing) return;
+    controller.paused=!controller.paused;
+    if(controller.paused) speechSynthesis.pause(); else speechSynthesis.resume();
+    updatePlayButtons();
+  }
+  function updatePlayButtons(){
+    const l=activeLesson(), s=sentence();
+    if(state.mode==='reading') els.play.textContent=controller.playing?'↻ Restart auto':'▶ Auto advance';
+    else els.play.textContent=controller.playing?'↻ Restart':'▶ Start';
+    els.pause.textContent=controller.paused?'▶ Resume':'Ⅱ Pause';
+    if(l&&s&&state.mode==='reading') els.play.disabled=!effectiveReadingSetting(s,l,'auto');
+  }
+
+  function move(delta){
+    const l=activeLesson(); if(!l) return;
+    const current=sentence();
+    stopPlayback(false);
+    if(delta>0 && state.mode==='reading') markStudiedOnce(current,'reading');
+    if(delta>0 && state.mode==='english') markStudiedOnce(current,'review');
+    if(delta>0 && l.currentIndex>=l.sentences.length-1) l.currentIndex=0;
+    else l.currentIndex=Math.max(0,Math.min(l.sentences.length-1,l.currentIndex+delta));
+    beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); scrollCurrentIntoView();
+  }
+
+  // Events
+  els.fileInput.addEventListener('change', async ev=>{
+    const files=[...ev.target.files]; if(!files.length) return;
+    els.fileStatus.textContent=`Reading ${files.length} file${files.length>1?'s':''}…`;
+    let ok=0, errors=[];
+    for(const f of files){
+      try{ const text=await f.text(); await addLessonFromText(f.name.replace(/\.txt$/i,''),text); ok++; }
+      catch(e){ errors.push(`${f.name}: ${e.message}`); }
+    }
+    els.fileStatus.textContent=`Loaded ${ok} file${ok===1?'':'s'}${errors.length?'. '+errors.join(' | '):'.'}`;
+    ev.target.value='';
+  });
+  els.loadPaste.addEventListener('click',async()=>{
+    const text=els.pasteBox.value.trim(); if(!text) return alert('Paste a lesson first.');
+    try{ await addLessonFromText(`Pasted lesson ${state.lessons.length+1}`,text); els.pasteBox.value=''; }
+    catch(e){ alert(e.message); }
+  });
+  els.modeChinese.addEventListener('click',()=>{ stopPlayback(false); state.mode='chinese'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
+  els.modeReading.addEventListener('click',()=>{ stopPlayback(false); state.mode='reading'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
+  els.modeEnglish.addEventListener('click',()=>{ stopPlayback(false); state.mode='english'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
+  els.repeatCount.addEventListener('change',()=>{ state.repeatCount=Number(els.repeatCount.value); saveState(); render(); });
+  els.globalGap.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; l.globalGap=els.globalGap.value==='auto'?'auto':Number(els.globalGap.value); saveState(); render(); });
+  els.currentGap.addEventListener('change',()=>{ const s=sentence(); if(!s)return; s.gapOverride=els.currentGap.value==='default'?null:Number(els.currentGap.value); saveState(); render(); });
+  els.readingOverrideEnabled.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; stopPlayback(false); l.readingOverrideEnabled=els.readingOverrideEnabled.checked; saveState(); render(); });
+  els.readingGeneralEnglish.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; l.readingGeneralEnglish=els.readingGeneralEnglish.checked; saveState(); render(); });
+  els.readingGeneralPinyin.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; l.readingGeneralPinyin=els.readingGeneralPinyin.checked; saveState(); render(); });
+  els.readingGeneralAuto.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; stopPlayback(false); l.readingGeneralAuto=els.readingGeneralAuto.checked; saveState(); render(); });
+  els.readingSentenceEnglish.addEventListener('change',()=>{ const s=sentence(); if(!s)return; s.readingShowEnglish=els.readingSentenceEnglish.checked; saveState(); render(); });
+  els.readingSentencePinyin.addEventListener('change',()=>{ const s=sentence(); if(!s)return; s.readingShowPinyin=els.readingSentencePinyin.checked; saveState(); render(); });
+  els.readingSentenceAuto.addEventListener('change',()=>{ const s=sentence(); if(!s)return; stopPlayback(false); s.readingAutoAdvance=els.readingSentenceAuto.checked; saveState(); render(); });
+  els.readingPlayOnce.addEventListener('click',async()=>{ const l=activeLesson(), s=sentence(); if(!l||!s||state.mode!=='reading'||effectiveReadingSetting(s,l,'auto')||isKnown(s))return; speechSynthesis.cancel(); const id=++controller.runId; try{const r=await speak(s.chinese,id); if(r==='ended') markStudiedOnce(s,'reading');}catch(e){alert('Unable to use this Mandarin voice.');} });
+  els.knownToggle.addEventListener('change',()=>{ const s=sentence(); if(!s)return; setKnown(s,els.knownToggle.checked); saveState(); render(); });
+  els.allKnownToggle.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; const value=els.allKnownToggle.checked; l.sentences.forEach(s=>{setKnown(s,value);}); saveState(); render(); });
+  els.allActive.addEventListener('click',()=>{ const l=activeLesson(); if(!l)return; l.sentences.forEach(s=>{setKnown(s,false);}); saveState(); render(); });
+  els.speechRate.addEventListener('change',()=>{ state.speechRate=Number(els.speechRate.value); saveState(); });
+  els.voiceSelect.addEventListener('change',()=>{ state.voiceURI=els.voiceSelect.value; saveState(); populateVoices(); });
+  els.showEnglish.addEventListener('change',()=>{ state.showEnglish=els.showEnglish.checked; saveState(); renderCurrent(); });
+  els.showPinyin.addEventListener('change',()=>{ state.showPinyin=els.showPinyin.checked; saveState(); render(); });
+  els.randomizeVoices.addEventListener('change',()=>{ state.randomizeVoices=els.randomizeVoices.checked; lastRandomVoiceURI=''; lastRandomGender=''; saveState(); populateVoices(); });
+  els.testVoice.addEventListener('click',async()=>{ stopPlayback(false); const id=++controller.runId; try{await speak('你好，很高兴认识你。',id);}catch(e){alert('Unable to use this voice.');} });
+  els.revealChinese.addEventListener('click',()=>{
+    controller.englishRevealed=!controller.englishRevealed;
+    // If Chinese is hidden again without having used the hidden-audio path, return to the initial
+    // English-only review state and hide pinyin as well. After hidden audio, pinyin may stay independent.
+    if(!controller.englishRevealed && !controller.reviewAudioPlayed) controller.reviewPinyinRevealed=false;
+    renderCurrent();
+  });
+  els.listenHiddenMandarin.addEventListener('click',async()=>{
+    const s=sentence(); if(!s||isKnown(s)||state.mode!=='english') return;
+    // Enter the hidden-audio review path immediately so an active 5-second review countdown pauses.
+    controller.reviewAudioPlayed=true;
+    renderCurrent();
+    speechSynthesis.cancel();
+    const id=controller.runId;
+    try{
+      const r=await speak(s.chinese,id);
+      if(r==='ended') markStudiedOnce(s,'review');
+    }catch(e){ alert('Unable to use this Mandarin voice.'); }
+  });
+  els.revealReviewPinyin.addEventListener('click',()=>{
+    if(!controller.englishRevealed && !controller.reviewAudioPlayed) return;
+    controller.reviewPinyinRevealed=!controller.reviewPinyinRevealed;
+    renderCurrent();
+  });
+  els.readRevealed.addEventListener('click',async()=>{
+    const s=sentence(); if(!s||isKnown(s)||!controller.englishRevealed)return;
+    speechSynthesis.cancel();
+    const id=controller.runId;
+    try{const r=await speak(s.chinese,id); if(r==='ended') markStudiedOnce(s,'review');}catch(e){alert('Unable to use this voice.');}
+  });
+  els.continueEnglish.addEventListener('click',()=>{
+    const l=activeLesson(); if(!l) return;
+    markStudiedOnce(sentence(),'review'); controller.englishRevealed=false; controller.reviewPinyinRevealed=false; controller.reviewAudioPlayed=false; controller.manualContinue=true;
+    if(!controller.playing){
+      const next=nextPlayableIndex(l,l.currentIndex+1);
+      if(next>=0) l.currentIndex=next;
+      else l.currentIndex=0;
+      beginStudyVisit();
+      resetTemporaryReveals(); saveState(); render(); scrollCurrentIntoView();
+    } else {
+      renderCurrent();
+    }
+  });
+  els.enableCounterReset.addEventListener('change',()=>{ counterResetUnlocked=els.enableCounterReset.checked; renderStudyCounters(); });
+  els.resetListeningCount.addEventListener('click',()=>resetStudyMode('listening'));
+  els.resetReadingCount.addEventListener('click',()=>resetStudyMode('reading'));
+  els.resetReviewCount.addEventListener('click',()=>resetStudyMode('review'));
+  els.resetAllCounts.addEventListener('click',resetAllStudyCounts);
+  els.toggleLessonList.addEventListener('click',()=>{
+    const l=activeLesson(); if(!l) return;
+    l.listVisible = l.listVisible===false;
+    saveState(); render();
+  });
+  els.toggleVocab.addEventListener('click',()=>{ state.vocabOpen=!state.vocabOpen; saveState(); renderVocabulary(); if(state.vocabOpen) setTimeout(()=>els.vocabCard.scrollIntoView({behavior:'smooth',block:'start'}),30); });
+  els.vocabFilter.addEventListener('change',()=>{ state.vocabFilter=els.vocabFilter.value; state.vocabIndex=0; saveState(); renderVocabulary(); });
+  els.vocabStatusFilter.addEventListener('change',()=>{ state.vocabStatusFilter=els.vocabStatusFilter.value; state.vocabIndex=0; saveState(); renderVocabulary(); });
+  els.vocabTypeFilter.addEventListener('change',()=>{ state.vocabTypeFilter=els.vocabTypeFilter.value; state.vocabIndex=0; saveState(); renderVocabulary(); });
+  els.vocabPrev.addEventListener('click',()=>{ if(state.vocabIndex>0){ state.vocabIndex--; saveState(); renderVocabulary(); } });
+  els.vocabNext.addEventListener('click',()=>{ const items=filteredVocabulary(); if(state.vocabIndex<items.length-1){ state.vocabIndex++; saveState(); renderVocabulary(); } });
+  els.vocabStatus.addEventListener('change',()=>{ const x=filteredVocabulary()[state.vocabIndex]; if(!x)return; x.status=els.vocabStatus.value; x.updatedAt=Date.now(); saveState(); renderVocabulary(); });
+  els.vocabType.addEventListener('change',()=>{ const x=filteredVocabulary()[state.vocabIndex]; if(!x)return; x.type=els.vocabType.value; x.updatedAt=Date.now(); saveState(); renderVocabulary(); });
+  els.vocabDifficult.addEventListener('change',()=>{ const x=filteredVocabulary()[state.vocabIndex]; if(!x)return; x.difficult=els.vocabDifficult.checked; x.updatedAt=Date.now(); saveState(); renderVocabulary(); });
+  els.vocabAdd.addEventListener('click',()=>{ const term=els.vocabAddInput.value.trim(); if(!term)return alert('Enter a Chinese word or phrase.'); if(!hasChinese(term))return alert('The vocabulary item must contain Chinese characters.'); addVocabularyTerm(term,els.vocabAddType.value); els.vocabAddInput.value=''; });
+  els.vocabAddInput.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); els.vocabAdd.click(); } });
+  els.vocabUseSelection.addEventListener('click',()=>{ const txt=(window.getSelection?.().toString()||'').trim(); if(!txt||!hasChinese(txt)) return alert('Select some Chinese text first.'); els.vocabAddInput.value=txt; els.vocabAddType.value=txt.length>2?'phrase':'word'; });
+  els.playWord.addEventListener('click',async()=>{ const x=filteredVocabulary()[state.vocabIndex]; if(!x)return; stopPlayback(false); const id=++controller.runId; try{await speak(x.term,id);}catch(e){alert('Unable to use this voice.');} });
+  els.playSource.addEventListener('click',async()=>{ const x=filteredVocabulary()[state.vocabIndex]; const src=entryPrimarySource(x); if(!src?.chinese)return; stopPlayback(false); const id=++controller.runId; try{await speak(src.chinese,id);}catch(e){alert('Unable to use this voice.');} });
+  els.removeWord.addEventListener('click',()=>{ const x=filteredVocabulary()[state.vocabIndex]; if(!x)return; if(confirm(`Remove “${x.term}” from the persistent vocabulary database?`)) removeVocabularyEntry(x); });
+  els.exportVocabulary.addEventListener('click',exportVocabulary);
+  els.exportWords.addEventListener('click',exportDifficultWords);
+  els.exportRevision.addEventListener('click',exportRevisionSentences);
+  els.rename.addEventListener('click',()=>{ const l=activeLesson(); if(!l)return; const n=prompt('Lesson name:',l.name); if(n&&n.trim()){ l.name=n.trim(); normalizeVocabulary(); state.vocabulary.forEach(x=>(x.sources||[]).forEach(src=>{ if(src.lessonId===l.id) src.lessonName=l.name; })); saveState(); render(); } });
+  els.remove.addEventListener('click',()=>{ const l=activeLesson(); if(l) removeLesson(l.id); });
+  els.prev.addEventListener('click',()=>move(-1)); els.next.addEventListener('click',()=>move(1));
+  els.play.addEventListener('click',()=>startPlayback()); els.pause.addEventListener('click',togglePause); els.stop.addEventListener('click',()=>stopPlayback());
+  els.cancelReplace.addEventListener('click',()=>{
+    pendingReplacement=null; els.replaceDialog.close();
+    if(replaceResolver){ const r=replaceResolver; replaceResolver=null; r(false); }
+  });
+
+  async function init(){
+    fillGapSelect(els.globalGap,false); fillGapSelect(els.currentGap,true,{globalGap:'auto'},null);
+    try{ db=await openDB(); await loadState(); }catch(e){ console.warn('IndexedDB unavailable',e); }
+    if(!Array.isArray(state.lessons)) state.lessons=[];
+    state.lessons=state.lessons.slice(0,MAX_LESSONS).map(l=>({...l,globalGap:l.globalGap==='auto'?'auto':(GAP_OPTIONS.includes(Number(l.globalGap))?Number(l.globalGap):2),currentIndex:Math.max(0,Math.min(Number(l.currentIndex)||0,(l.sentences?.length||1)-1)),listVisible:l.listVisible!==false,readingOverrideEnabled:l.readingOverrideEnabled===true,readingGeneralEnglish:l.readingGeneralEnglish===true,readingGeneralPinyin:l.readingGeneralPinyin===true,readingGeneralAuto:l.readingGeneralAuto===true,sentences:(l.sentences||[]).map(s=>{ const legacyKnown=s.known===true; const n={...s,knownListening:s.knownListening===true||legacyKnown,knownReading:s.knownReading===true||legacyKnown,knownReview:s.knownReview===true||legacyKnown,gapOverride:GAP_OPTIONS.includes(Number(s.gapOverride))?Number(s.gapOverride):null,readingShowEnglish:s.readingShowEnglish===true,readingShowPinyin:s.readingShowPinyin===true,readingAutoAdvance:s.readingAutoAdvance===true}; delete n.known; return n; })}));
+    if(!state.activeId || !state.lessons.some(l=>l.id===state.activeId)) state.activeId=state.lessons[0]?.id||null;
+    state.mode=['chinese','reading','english'].includes(state.mode)?state.mode:'chinese';
+    state.repeatCount=[1,2].includes(Number(state.repeatCount))?Number(state.repeatCount):1;
+    state.speechRate=Number(state.speechRate)||1;
+    state.showEnglish=state.showEnglish!==false; state.showPinyin=state.showPinyin!==false; state.randomizeVoices=state.randomizeVoices!==false; normalizeStudyHistory(); counterResetUnlocked=false;
+    if(!Array.isArray(state.difficultWords)) state.difficultWords=[];
+    state.difficultWords=state.difficultWords.filter(x=>x&&typeof x.word==='string'&&x.word.trim()&&x.source).map(x=>({...x,word:x.word.trim()}));
+    normalizeVocabulary();
+    state.vocabOpen=state.vocabOpen===true; state.vocabFilter=state.vocabFilter||'all'; state.vocabStatusFilter=state.vocabStatusFilter||'all'; state.vocabTypeFilter=state.vocabTypeFilter||'all'; state.vocabIndex=Math.max(0,Number(state.vocabIndex)||0);
+    saveState(); render(); updatePlayButtons();
+    populateVoices(); speechSynthesis.onvoiceschanged=populateVoices;
+    let storageNote='storage standard';
+    try{
+      if(navigator.storage?.persist){
+        const persistent=await navigator.storage.persist();
+        storageNote=persistent?'storage persistent':'storage standard';
+      }
+    }catch(e){ console.warn('Persistent storage request unavailable',e); }
+    els.status.textContent=`Ready · v${APP_VERSION} · ${storageNote}`;
+    requestScreenWakeLock();
+    if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+      navigator.serviceWorker.register('./sw.js').then(()=>{ els.status.textContent += ' · offline enabled'; }).catch(()=>{});
+    }
+  }
+  window.addEventListener('pagehide',saveLocalBackupNow);
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') saveLocalBackupNow(); });
+
+  init();
+})();
+</script>
+</body>
+</html>
