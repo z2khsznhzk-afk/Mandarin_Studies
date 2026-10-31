@@ -44,7 +44,8 @@
     .btn.ghost{border-color:var(--line)}
     .btn.danger{color:var(--danger);border-color:#f3b7b2}
     .btn:disabled{opacity:.45;cursor:not-allowed}
-    .mode-switch{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .mode-switch{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    @media(min-width:650px){.mode-switch{grid-template-columns:repeat(4,1fr)}}
     .mode-switch button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;font-weight:700}
     .mode-switch button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
     .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
@@ -137,6 +138,30 @@
     .vocab-contexts{display:flex;flex-direction:column;gap:7px;margin-top:10px}
     .vocab-context{border-top:1px solid var(--line);padding-top:7px;font-size:.82rem;line-height:1.45;color:var(--muted)}
     .vocab-row-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+    .dictation-actions{margin-top:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
+    .dictation-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    @media(min-width:650px){.dictation-toolbar{grid-template-columns:180px 220px 1fr}}
+    .dictation-input{min-height:74px;margin-top:10px;font-size:1.2rem;line-height:1.5}
+    .dictation-feedback{margin-top:10px;border-radius:12px;padding:10px;background:#fff;border:1px solid var(--line);font-size:.9rem;line-height:1.5}
+    .dictation-feedback.correct{background:#edf8ed;border-color:#b7ddb7}
+    .dictation-feedback.almost{background:#fff8df;border-color:#ead48d}
+    .dictation-feedback.incorrect{background:#fff0ed;border-color:#efbbb3}
+    .dictation-diff{margin-top:8px;font-size:1.15rem;line-height:1.7;word-break:break-word}
+    .dictation-bad{background:#ffd9d2;color:#7b2016;border-radius:4px;padding:1px 2px;text-decoration:line-through}
+    .dictation-good{background:#e6f5e6;color:#1f5c2a;border-radius:4px;padding:1px 2px}
+    .dictation-missing{display:inline-block;border-bottom:2px solid #b42318;min-width:.75em;margin:0 1px}
+    .dictation-statusline{font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.45}
+    .dictation-hidden-row{font-size:.88rem;color:var(--muted);font-style:italic;padding:3px 0}
+    .daily-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    @media(min-width:650px){.daily-summary-grid{grid-template-columns:1.2fr 1fr 1fr}}
+    .daily-box{border:1px solid var(--line);border-radius:13px;padding:10px;background:#fafafa}
+    .daily-big{font-size:1.55rem;font-weight:800;line-height:1.2;margin:2px 0 4px}
+    .daily-breakdown{font-size:.82rem;color:#4e4e4e;line-height:1.5}
+    .daily-history{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+    .daily-row{display:grid;grid-template-columns:minmax(90px,1fr) 2.2fr auto;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:7px;font-size:.82rem}
+    .daily-row:first-child{border-top:0;padding-top:0}
+    .daily-row-modes{color:var(--muted);line-height:1.35}
+    .daily-row-total{font-weight:800;white-space:nowrap}
   </style>
 </head>
 <body>
@@ -144,7 +169,7 @@
     <header>
       <div>
         <h1>Mandarin Listening Practice</h1>
-        <div class="sub">10-lesson offline workspace · Mandarin listening · Mandarin reading · English review</div>
+        <div class="sub">15-lesson offline workspace · Listening · Reading · Review · Dictation</div>
       </div>
       <div>
         <div class="status" id="appStatus">Starting…</div>
@@ -179,6 +204,7 @@
           <button id="modeChinese">Mandarin listening</button>
           <button id="modeReading">Mandarin reading</button>
           <button id="modeEnglish">English review</button>
+          <button id="modeDictation">Dictation</button>
         </div>
       </section>
 
@@ -237,26 +263,56 @@
         <div class="study-counter-head">
           <div>
             <strong>Study counter</strong>
-            <div class="tiny">Each completed sentence study counts once. A Mandarin sentence read twice in Listening still counts as one study.</div>
+            <div class="tiny">Each completed sentence study counts once. A Mandarin sentence read twice in Listening still counts as one study. Dictation is counted once when an answer is completed or revealed.</div>
           </div>
           <label class="toggle"><input id="enableCounterReset" type="checkbox" /> Enable reset controls</label>
         </div>
         <div class="study-count-grid">
           <div class="study-count-box">
             <div class="study-count-title">Current sentence</div>
-            <div class="study-count-values" id="currentStudyCounts">Listening 0 · Reading 0 · Review 0 · Total 0</div>
+            <div class="study-count-values" id="currentStudyCounts">Listening 0 · Reading 0 · Review 0 · Dictation 0 · Total 0</div>
           </div>
           <div class="study-count-box">
             <div class="study-count-title">All study activity</div>
-            <div class="study-count-values" id="allStudyCounts">Listening 0 · Reading 0 · Review 0 · Total 0</div>
+            <div class="study-count-values" id="allStudyCounts">Listening 0 · Reading 0 · Review 0 · Dictation 0 · Total 0</div>
           </div>
         </div>
         <div class="reset-actions hidden" id="counterResetActions">
           <button class="btn danger" id="resetListeningCount" type="button">Reset Listening count</button>
           <button class="btn danger" id="resetReadingCount" type="button">Reset Reading count</button>
           <button class="btn danger" id="resetReviewCount" type="button">Reset Review count</button>
+          <button class="btn danger" id="resetDictationCount" type="button">Reset Dictation count</button>
           <button class="btn danger" id="resetAllCounts" type="button">Reset all counts</button>
         </div>
+      </section>
+
+      <section class="card" id="dailyProgressCard">
+        <div class="study-counter-head">
+          <div>
+            <strong>Daily progress</strong>
+            <div class="tiny">Tracks completed sentence studies by local calendar day. Read twice in Listening still counts once; a completed Dictation attempt cycle counts once.</div>
+          </div>
+          <span class="mode-badge" id="dailyStreak">Streak 0 days</span>
+        </div>
+        <div class="daily-summary-grid">
+          <div class="daily-box">
+            <div class="study-count-title">Today</div>
+            <div class="daily-big" id="dailyTodayTotal">0</div>
+            <div class="daily-breakdown" id="dailyTodayBreakdown">Listening 0 · Reading 0 · Review 0 · Dictation 0</div>
+          </div>
+          <div class="daily-box">
+            <div class="study-count-title">Last 7 days</div>
+            <div class="daily-big" id="dailyWeekTotal">0</div>
+            <div class="daily-breakdown" id="dailyWeekBreakdown">0 active days</div>
+          </div>
+          <div class="daily-box">
+            <div class="study-count-title">Best streak</div>
+            <div class="daily-big" id="dailyBestStreak">0 days</div>
+            <div class="daily-breakdown">A study day is any day with at least one completed sentence study.</div>
+          </div>
+        </div>
+        <div class="daily-history" id="dailyHistory"></div>
+        <div class="tiny" style="margin-top:9px">Daily history starts with v5.12.5. Older all-time counts have no date information, so they cannot be assigned retroactively to individual days.</div>
       </section>
 
       <section class="card">
@@ -287,6 +343,41 @@
             <button class="btn accent" id="readingPlayOnceBtn" type="button">▶ Read Mandarin once</button>
           </div>
           <div class="reading-status" id="readingSentenceStatus"></div>
+        </div>
+
+        <div id="dictationActions" class="dictation-actions hidden">
+          <strong>Dictation · listen and type what you hear</strong>
+          <div class="tiny">Chinese, pinyin and English stay hidden until you answer correctly or reveal the answer. Spaces and punctuation are ignored when checking.</div>
+          <div class="dictation-toolbar">
+            <div>
+              <label class="small">Read sentence</label>
+              <select id="dictationRepeatCount">
+                <option value="1">Once</option>
+                <option value="2">Twice</option>
+              </select>
+            </div>
+            <div>
+              <label class="small">Sentence length</label>
+              <select id="dictationLength">
+                <option value="all">All sentences</option>
+                <option value="short">Short only · ≤20 Chinese characters</option>
+              </select>
+            </div>
+            <div class="btnrow" style="align-items:end">
+              <button class="btn accent" id="dictationListenBtn" type="button">🔊 Listen</button>
+            </div>
+          </div>
+          <textarea id="dictationInput" class="dictation-input" inputmode="text" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="Type the Chinese sentence here"></textarea>
+          <div class="btnrow" style="margin-top:8px">
+            <button class="btn primary" id="dictationCheckBtn" type="button">Check answer</button>
+            <button class="btn hidden" id="dictationTryAgainBtn" type="button">Try again</button>
+            <button class="btn ghost" id="dictationShowAnswerBtn" type="button">Show answer</button>
+            <button class="btn accent hidden" id="dictationNextBtn" type="button">Next sentence ▶</button>
+          </div>
+          <div id="dictationFeedback" class="dictation-feedback hidden"></div>
+          <div id="dictationDiff" class="dictation-diff hidden"></div>
+          <div id="dictationStatus" class="dictation-statusline"></div>
+          <div id="dictationStats" class="dictation-statusline"></div>
         </div>
 
         <div class="current-gap" id="listeningGapControls">
@@ -425,7 +516,7 @@
 <script>
 (() => {
   'use strict';
-  const APP_VERSION = '5.12.3';
+  const APP_VERSION = '5.12.5';
   const MAX_LESSONS = 15;
   const GAP_OPTIONS = [2,3,4,5,7,10];
   const DB_NAME = 'mandarin-listening-workspace';
@@ -438,22 +529,22 @@
   const $ = id => document.getElementById(id);
   const els = {
     status:$('appStatus'), wakeStatus:$('wakeStatus'), tabs:$('lessonTabs'), fileInput:$('fileInput'), fileStatus:$('fileStatus'), pasteBox:$('pasteBox'), loadPaste:$('loadPasteBtn'),
-    workspace:$('workspace'), empty:$('emptyCard'), modeChinese:$('modeChinese'), modeReading:$('modeReading'), modeEnglish:$('modeEnglish'), repeatCount:$('repeatCount'), globalGap:$('globalGap'),
+    workspace:$('workspace'), empty:$('emptyCard'), modeChinese:$('modeChinese'), modeReading:$('modeReading'), modeEnglish:$('modeEnglish'), modeDictation:$('modeDictation'), repeatCount:$('repeatCount'), globalGap:$('globalGap'),
     speechRate:$('speechRate'), voiceSelect:$('voiceSelect'), showEnglish:$('showEnglish'), showPinyin:$('showPinyin'), randomizeVoices:$('randomizeVoices'), testVoice:$('testVoiceBtn'), voiceWarning:$('voiceWarning'), voiceVariationStatus:$('voiceVariationStatus'), toggleVocab:$('toggleVocabBtn'), vocabCount:$('vocabCount'),
     vocabCard:$('vocabCard'), vocabFilter:$('vocabFilter'), vocabStatusFilter:$('vocabStatusFilter'), vocabTypeFilter:$('vocabTypeFilter'), vocabEmpty:$('vocabEmpty'), vocabContent:$('vocabContent'), vocabCounter:$('vocabCounter'), vocabWord:$('vocabWord'), vocabBadges:$('vocabBadges'), vocabStatus:$('vocabStatus'), vocabType:$('vocabType'), vocabDifficult:$('vocabDifficult'), vocabEnglish:$('vocabEnglish'), vocabChinese:$('vocabChinese'), vocabPinyin:$('vocabPinyin'), vocabSource:$('vocabSource'), vocabContexts:$('vocabContexts'), vocabPrev:$('vocabPrevBtn'), vocabNext:$('vocabNextBtn'), playWord:$('playWordBtn'), playSource:$('playSourceBtn'), removeWord:$('removeWordBtn'), exportVocabulary:$('exportVocabularyBtn'), exportWords:$('exportWordsBtn'), exportRevision:$('exportRevisionBtn'), vocabList:$('vocabList'), vocabAddInput:$('vocabAddInput'), vocabAddType:$('vocabAddType'), vocabAdd:$('vocabAddBtn'), vocabUseSelection:$('vocabUseSelectionBtn'),
-    counter:$('counter'), knownCounter:$('knownCounter'), currentStudyCounts:$('currentStudyCounts'), allStudyCounts:$('allStudyCounts'), enableCounterReset:$('enableCounterReset'), counterResetActions:$('counterResetActions'), resetListeningCount:$('resetListeningCount'), resetReadingCount:$('resetReadingCount'), resetReviewCount:$('resetReviewCount'), resetAllCounts:$('resetAllCounts'), english:$('englishText'), chinese:$('chineseText'), pinyin:$('pinyinText'), englishActions:$('englishReviewActions'), revealChinese:$('revealChineseBtn'), listenHiddenMandarin:$('listenHiddenMandarinBtn'), revealReviewPinyin:$('revealReviewPinyinBtn'),
-    readRevealed:$('readRevealedBtn'), continueEnglish:$('continueEnglishBtn'), readingGeneralSettings:$('readingGeneralSettings'), readingOverrideEnabled:$('readingOverrideEnabled'), readingGeneralOptions:$('readingGeneralOptions'), readingGeneralEnglish:$('readingGeneralEnglish'), readingGeneralPinyin:$('readingGeneralPinyin'), readingGeneralAuto:$('readingGeneralAuto'), readingGeneralStatus:$('readingGeneralStatus'), readingActions:$('readingActions'), readingSentenceEnglish:$('readingSentenceEnglish'), readingSentencePinyin:$('readingSentencePinyin'), readingSentenceAuto:$('readingSentenceAuto'), readingPlayOnce:$('readingPlayOnceBtn'), readingSentenceStatus:$('readingSentenceStatus'), listeningGapControls:$('listeningGapControls'), currentGap:$('currentGap'), effectiveGap:$('effectiveGapLabel'), lessonName:$('lessonName'), lessonMeta:$('lessonMeta'),
+    counter:$('counter'), knownCounter:$('knownCounter'), currentStudyCounts:$('currentStudyCounts'), allStudyCounts:$('allStudyCounts'), dailyStreak:$('dailyStreak'), dailyTodayTotal:$('dailyTodayTotal'), dailyTodayBreakdown:$('dailyTodayBreakdown'), dailyWeekTotal:$('dailyWeekTotal'), dailyWeekBreakdown:$('dailyWeekBreakdown'), dailyBestStreak:$('dailyBestStreak'), dailyHistory:$('dailyHistory'), enableCounterReset:$('enableCounterReset'), counterResetActions:$('counterResetActions'), resetListeningCount:$('resetListeningCount'), resetReadingCount:$('resetReadingCount'), resetReviewCount:$('resetReviewCount'), resetDictationCount:$('resetDictationCount'), resetAllCounts:$('resetAllCounts'), english:$('englishText'), chinese:$('chineseText'), pinyin:$('pinyinText'), englishActions:$('englishReviewActions'), revealChinese:$('revealChineseBtn'), listenHiddenMandarin:$('listenHiddenMandarinBtn'), revealReviewPinyin:$('revealReviewPinyinBtn'),
+    readRevealed:$('readRevealedBtn'), continueEnglish:$('continueEnglishBtn'), readingGeneralSettings:$('readingGeneralSettings'), readingOverrideEnabled:$('readingOverrideEnabled'), readingGeneralOptions:$('readingGeneralOptions'), readingGeneralEnglish:$('readingGeneralEnglish'), readingGeneralPinyin:$('readingGeneralPinyin'), readingGeneralAuto:$('readingGeneralAuto'), readingGeneralStatus:$('readingGeneralStatus'), readingActions:$('readingActions'), readingSentenceEnglish:$('readingSentenceEnglish'), readingSentencePinyin:$('readingSentencePinyin'), readingSentenceAuto:$('readingSentenceAuto'), readingPlayOnce:$('readingPlayOnceBtn'), readingSentenceStatus:$('readingSentenceStatus'), dictationActions:$('dictationActions'), dictationRepeatCount:$('dictationRepeatCount'), dictationLength:$('dictationLength'), dictationListen:$('dictationListenBtn'), dictationInput:$('dictationInput'), dictationCheck:$('dictationCheckBtn'), dictationTryAgain:$('dictationTryAgainBtn'), dictationShowAnswer:$('dictationShowAnswerBtn'), dictationNext:$('dictationNextBtn'), dictationFeedback:$('dictationFeedback'), dictationDiff:$('dictationDiff'), dictationStatus:$('dictationStatus'), dictationStats:$('dictationStats'), listeningGapControls:$('listeningGapControls'), currentGap:$('currentGap'), effectiveGap:$('effectiveGapLabel'), lessonName:$('lessonName'), lessonMeta:$('lessonMeta'),
     knownToggle:$('knownToggle'), knownToggleText:$('knownToggleText'), knownBadge:$('knownBadge'), allKnownToggle:$('allKnownToggle'), allKnownToggleText:$('allKnownToggleText'), allActive:$('allActiveBtn'), allKnownStatus:$('allKnownStatus'), toggleLessonList:$('toggleLessonListBtn'), rename:$('renameBtn'), remove:$('removeLessonBtn'), list:$('lessonList'), prev:$('prevBtn'), play:$('playBtn'), pause:$('pauseBtn'), stop:$('stopBtn'), next:$('nextBtn'),
     replaceDialog:$('replaceDialog'), replaceList:$('replaceList'), cancelReplace:$('cancelReplaceBtn')
   };
 
   let state = {
     lessons: [], activeId: null, mode: 'chinese', repeatCount: 1, speechRate: 1, showEnglish: true, showPinyin: true, voiceURI: '',
-    difficultWords: [], vocabulary: [], vocabMigrationDone: false, vocabOpen: false, vocabFilter: 'all', vocabStatusFilter: 'all', vocabTypeFilter: 'all', vocabIndex: 0, randomizeVoices: true, studyHistory: {}
+    difficultWords: [], vocabulary: [], vocabMigrationDone: false, vocabOpen: false, vocabFilter: 'all', vocabStatusFilter: 'all', vocabTypeFilter: 'all', vocabIndex: 0, randomizeVoices: true, studyHistory: {}, dailyProgress: {}, dictationHistory: {}, dictationRepeatCount: 1, dictationLength: 'all'
   };
   let db = null;
   let voices = [];
-  let controller = { runId:0, playing:false, paused:false, pendingTimer:null, englishRevealed:false, reviewPinyinRevealed:false, reviewAudioPlayed:false, manualContinue:false, showOnlyEnglish:false, showOnlyPinyin:false, studyVisitSerial:0, studyCountedKey:'' };
+  let controller = { runId:0, playing:false, paused:false, pendingTimer:null, englishRevealed:false, reviewPinyinRevealed:false, reviewAudioPlayed:false, manualContinue:false, showOnlyEnglish:false, showOnlyPinyin:false, studyVisitSerial:0, studyCountedKey:'', dictationAttempts:0, dictationCorrect:false, dictationRevealed:false, dictationUserAnswer:'', dictationSessionCompleted:false, dictationHeard:false };
   let pendingReplacement = null;
   let replaceResolver = null;
   let screenWakeLock = null;
@@ -490,7 +581,7 @@
       if(looksLikeHeader(english) || looksLikeHeader(chinese)) continue;
       let pinyin = '';
       if(g[zhIndex+1] && !hasChinese(g[zhIndex+1]) && !looksLikeHeader(g[zhIndex+1])) pinyin = g[zhIndex+1];
-      out.push({ english, chinese, pinyin, gapOverride:null, knownListening:false, knownReading:false, knownReview:false, readingShowEnglish:false, readingShowPinyin:false, readingAutoAdvance:false });
+      out.push({ english, chinese, pinyin, gapOverride:null, knownListening:false, knownReading:false, knownReview:false, knownDictation:false, readingShowEnglish:false, readingShowPinyin:false, readingAutoAdvance:false });
     }
 
     // Fallback for tightly packed 2/3-line content without blank separators.
@@ -501,7 +592,7 @@
           const english=lines[i-1], chinese=lines[i];
           let pinyin='';
           if(lines[i+1] && !hasChinese(lines[i+1]) && !looksLikeHeader(lines[i+1]) && /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/i.test(lines[i+1])) pinyin=lines[i+1];
-          out.push({english,chinese,pinyin,gapOverride:null,knownListening:false,knownReading:false,knownReview:false,readingShowEnglish:false,readingShowPinyin:false,readingAutoAdvance:false});
+          out.push({english,chinese,pinyin,gapOverride:null,knownListening:false,knownReading:false,knownReview:false,knownDictation:false,readingShowEnglish:false,readingShowPinyin:false,readingAutoAdvance:false});
         }
       }
     }
@@ -585,15 +676,16 @@
     if(mode==='chinese' || mode==='listening') return 'listening';
     if(mode==='reading') return 'reading';
     if(mode==='english' || mode==='review') return 'review';
+    if(mode==='dictation') return 'dictation';
     return 'listening';
   }
   function knownModeLabel(mode=state.mode){
     const m=knownMode(mode);
-    return m==='listening'?'Listening':m==='reading'?'Reading':'Review';
+    return m==='listening'?'Listening':m==='reading'?'Reading':m==='review'?'Review':'Dictation';
   }
   function knownField(mode=state.mode){
     const m=knownMode(mode);
-    return m==='listening'?'knownListening':m==='reading'?'knownReading':'knownReview';
+    return m==='listening'?'knownListening':m==='reading'?'knownReading':m==='review'?'knownReview':'knownDictation';
   }
   function isKnown(s,mode=state.mode){ return s?.[knownField(mode)]===true; }
   function setKnown(s,value,mode=state.mode){ if(s) s[knownField(mode)]=value===true; }
@@ -607,7 +699,8 @@
     return {
       listening:knownCount(l,'listening'),
       reading:knownCount(l,'reading'),
-      review:knownCount(l,'review')
+      review:knownCount(l,'review'),
+      dictation:knownCount(l,'dictation')
     };
   }
   function effectiveReadingSetting(s=sentence(), l=activeLesson(), key='english'){
@@ -617,6 +710,91 @@
     return s?.[pair[0]]===true;
   }
   function readingAutoSeconds(s=sentence()){ return autoGapForSentence(s); }
+
+  function resetDictationInteraction(){
+    controller.dictationAttempts=0;
+    controller.dictationCorrect=false;
+    controller.dictationRevealed=false;
+    controller.dictationUserAnswer='';
+    controller.dictationSessionCompleted=false;
+    controller.dictationHeard=false;
+  }
+  function dictationEligible(s){
+    if(!s) return false;
+    if(state.dictationLength==='short' && chineseCharacterCount(s)>20) return false;
+    return true;
+  }
+  function nextDictationIndex(l,start,dir=1){
+    if(!l) return -1;
+    if(dir>=0){
+      for(let i=Math.max(0,start);i<l.sentences.length;i++) if(dictationEligible(l.sentences[i]) && !isKnown(l.sentences[i],'dictation')) return i;
+    }else{
+      for(let i=Math.min(l.sentences.length-1,start);i>=0;i--) if(dictationEligible(l.sentences[i]) && !isKnown(l.sentences[i],'dictation')) return i;
+    }
+    return -1;
+  }
+  function normalizeDictationAnswer(v){
+    return String(v||'').normalize('NFKC').replace(/[\s\u200B-\u200D\uFEFF，。！？；：、“”‘’（）()《》〈〉【】［］…—,.!?;:'"`~·\-]/g,'');
+  }
+  function dictationDistance(a,b){
+    const A=[...a], B=[...b], m=A.length, n=B.length;
+    const d=Array.from({length:m+1},()=>Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) d[i][0]=i;
+    for(let j=0;j<=n;j++) d[0][j]=j;
+    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(A[i-1]===B[j-1]?0:1));
+    return d[m][n];
+  }
+  function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function dictationUserDiffHTML(answer,expected){
+    const A=[...normalizeDictationAnswer(answer)], B=[...normalizeDictationAnswer(expected)], m=A.length, n=B.length;
+    const d=Array.from({length:m+1},()=>Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) d[i][0]=i; for(let j=0;j<=n;j++) d[0][j]=j;
+    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(A[i-1]===B[j-1]?0:1));
+    let i=m,j=n,ops=[];
+    while(i>0||j>0){
+      if(i>0&&j>0&&A[i-1]===B[j-1]&&d[i][j]===d[i-1][j-1]){ ops.push(['ok',A[i-1]]);i--;j--; }
+      else if(i>0&&j>0&&d[i][j]===d[i-1][j-1]+1){ ops.push(['bad',A[i-1]]);i--;j--; }
+      else if(i>0&&d[i][j]===d[i-1][j]+1){ ops.push(['bad',A[i-1]]);i--; }
+      else { ops.push(['missing','']);j--; }
+    }
+    return ops.reverse().map(([t,c])=>t==='ok'?escapeHTML(c):t==='bad'?`<span class="dictation-bad">${escapeHTML(c)}</span>`:'<span class="dictation-missing">&nbsp;</span>').join('');
+  }
+  function dictationExpectedDiffHTML(answer,expected){
+    const A=[...normalizeDictationAnswer(answer)], B=[...normalizeDictationAnswer(expected)], m=A.length, n=B.length;
+    const d=Array.from({length:m+1},()=>Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) d[i][0]=i; for(let j=0;j<=n;j++) d[0][j]=j;
+    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(A[i-1]===B[j-1]?0:1));
+    let i=m,j=n,ops=[];
+    while(i>0||j>0){
+      if(i>0&&j>0&&A[i-1]===B[j-1]&&d[i][j]===d[i-1][j-1]){ ops.push(['ok',B[j-1]]);i--;j--; }
+      else if(i>0&&j>0&&d[i][j]===d[i-1][j-1]+1){ ops.push(['good',B[j-1]]);i--;j--; }
+      else if(j>0&&d[i][j]===d[i][j-1]+1){ ops.push(['good',B[j-1]]);j--; }
+      else { i--; }
+    }
+    return ops.reverse().map(([t,c])=>t==='ok'?escapeHTML(c):`<span class="dictation-good">${escapeHTML(c)}</span>`).join('');
+  }
+  function normalizeDictationHistory(){
+    if(!state.dictationHistory || typeof state.dictationHistory!=='object' || Array.isArray(state.dictationHistory)) state.dictationHistory={};
+    for(const [k,v] of Object.entries(state.dictationHistory)){
+      if(!v || typeof v!=='object'){ delete state.dictationHistory[k]; continue; }
+      ['sessions','checks','firstTryCorrect','retryCorrect','failed'].forEach(x=>v[x]=Math.max(0,Number(v[x])||0));
+    }
+  }
+  function dictationEntry(s,create=false){
+    normalizeDictationHistory(); const k=studyKey(s); if(!k) return {sessions:0,checks:0,firstTryCorrect:0,retryCorrect:0,failed:0};
+    if(!state.dictationHistory[k] && create) state.dictationHistory[k]={sessions:0,checks:0,firstTryCorrect:0,retryCorrect:0,failed:0};
+    return state.dictationHistory[k] || {sessions:0,checks:0,firstTryCorrect:0,retryCorrect:0,failed:0};
+  }
+  function dictationTotals(){
+    normalizeDictationHistory(); const t={sessions:0,checks:0,firstTryCorrect:0,retryCorrect:0,failed:0};
+    Object.values(state.dictationHistory).forEach(v=>Object.keys(t).forEach(k=>t[k]+=Number(v[k])||0)); return t;
+  }
+  function completeDictationSession(s,outcome){
+    if(!s || controller.dictationSessionCompleted) return;
+    const e=dictationEntry(s,true); e.sessions++;
+    if(outcome==='first') e.firstTryCorrect++; else if(outcome==='retry') e.retryCorrect++; else e.failed++;
+    controller.dictationSessionCompleted=true; markStudiedOnce(s,'dictation'); saveState();
+  }
 
   function returnLessonToFirst(l=activeLesson()){
     if(!l || !l.sentences?.length) return;
@@ -684,51 +862,124 @@
       v.listening=Math.max(0,Number(v.listening)||0);
       v.reading=Math.max(0,Number(v.reading)||0);
       v.review=Math.max(0,Number(v.review)||0);
+      v.dictation=Math.max(0,Number(v.dictation)||0);
     }
   }
   function studyEntry(s,create=false){
     normalizeStudyHistory();
-    const k=studyKey(s); if(!k) return {listening:0,reading:0,review:0};
-    if(!state.studyHistory[k] && create) state.studyHistory[k]={listening:0,reading:0,review:0};
-    return state.studyHistory[k] || {listening:0,reading:0,review:0};
+    const k=studyKey(s); if(!k) return {listening:0,reading:0,review:0,dictation:0};
+    if(!state.studyHistory[k] && create) state.studyHistory[k]={listening:0,reading:0,review:0,dictation:0};
+    return state.studyHistory[k] || {listening:0,reading:0,review:0,dictation:0};
   }
   function studyTotals(){
     normalizeStudyHistory();
-    const t={listening:0,reading:0,review:0};
-    Object.values(state.studyHistory).forEach(v=>{ t.listening+=Number(v.listening)||0; t.reading+=Number(v.reading)||0; t.review+=Number(v.review)||0; });
-    t.total=t.listening+t.reading+t.review; return t;
+    const t={listening:0,reading:0,review:0,dictation:0};
+    Object.values(state.studyHistory).forEach(v=>{ t.listening+=Number(v.listening)||0; t.reading+=Number(v.reading)||0; t.review+=Number(v.review)||0; t.dictation+=Number(v.dictation)||0; });
+    t.total=t.listening+t.reading+t.review+t.dictation; return t;
   }
-  function beginStudyVisit(){ controller.studyVisitSerial++; controller.studyCountedKey=''; }
+  function localDayKey(d=new Date()){
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function dayFromKey(key){
+    const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(key||'');
+    if(!m) return null;
+    return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12,0,0,0);
+  }
+  function normalizeDailyProgress(){
+    if(!state.dailyProgress || typeof state.dailyProgress!=='object' || Array.isArray(state.dailyProgress)) state.dailyProgress={};
+    for(const [day,v] of Object.entries(state.dailyProgress)){
+      if(!dayFromKey(day) || !v || typeof v!=='object'){ delete state.dailyProgress[day]; continue; }
+      ['listening','reading','review','dictation'].forEach(k=>v[k]=Math.max(0,Number(v[k])||0));
+    }
+  }
+  function dailyEntry(day=localDayKey(),create=false){
+    normalizeDailyProgress();
+    if(!state.dailyProgress[day] && create) state.dailyProgress[day]={listening:0,reading:0,review:0,dictation:0};
+    return state.dailyProgress[day] || {listening:0,reading:0,review:0,dictation:0};
+  }
+  function dailyTotal(e){ return (Number(e?.listening)||0)+(Number(e?.reading)||0)+(Number(e?.review)||0)+(Number(e?.dictation)||0); }
+  function recordDailyStudy(mode){
+    if(!['listening','reading','review','dictation'].includes(mode)) return;
+    const e=dailyEntry(localDayKey(),true);
+    e[mode]=(Number(e[mode])||0)+1;
+    e.updatedAt=Date.now();
+  }
+  function streakStats(){
+    normalizeDailyProgress();
+    const active=new Set(Object.entries(state.dailyProgress).filter(([,v])=>dailyTotal(v)>0).map(([k])=>k));
+    const today=new Date(); today.setHours(12,0,0,0);
+    let cursor=new Date(today);
+    if(!active.has(localDayKey(cursor))) cursor.setDate(cursor.getDate()-1);
+    let current=0;
+    while(active.has(localDayKey(cursor))){ current++; cursor.setDate(cursor.getDate()-1); }
+    const sorted=[...active].sort();
+    let best=0, run=0, prev=null;
+    for(const key of sorted){
+      const d=dayFromKey(key);
+      if(!d) continue;
+      if(prev){ const diff=Math.round((d-prev)/86400000); run=diff===1?run+1:1; } else run=1;
+      best=Math.max(best,run); prev=d;
+    }
+    return {current,best};
+  }
+  function renderDailyProgress(){
+    if(!els.dailyTodayTotal) return;
+    normalizeDailyProgress();
+    const todayKey=localDayKey();
+    const today=dailyEntry(todayKey,false);
+    const todayTotal=dailyTotal(today);
+    els.dailyTodayTotal.textContent=String(todayTotal);
+    els.dailyTodayBreakdown.textContent=`Listening ${today.listening||0} · Reading ${today.reading||0} · Review ${today.review||0} · Dictation ${today.dictation||0}`;
+    let weekTotal=0, activeDays=0;
+    const rows=[];
+    const fmt=new Intl.DateTimeFormat(undefined,{weekday:'short',day:'numeric',month:'short'});
+    for(let offset=0;offset<7;offset++){
+      const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()-offset);
+      const key=localDayKey(d), e=dailyEntry(key,false), total=dailyTotal(e);
+      weekTotal+=total; if(total>0) activeDays++;
+      const label=offset===0?'Today':offset===1?'Yesterday':fmt.format(d);
+      rows.push(`<div class="daily-row"><div>${escapeHTML(label)}</div><div class="daily-row-modes">L ${e.listening||0} · R ${e.reading||0} · Review ${e.review||0} · D ${e.dictation||0}</div><div class="daily-row-total">${total}</div></div>`);
+    }
+    const streak=streakStats();
+    els.dailyWeekTotal.textContent=String(weekTotal);
+    els.dailyWeekBreakdown.textContent=`${activeDays} active day${activeDays===1?'':'s'} · average ${activeDays?Math.round(weekTotal/activeDays):0} per active day`;
+    els.dailyStreak.textContent=`Streak ${streak.current} day${streak.current===1?'':'s'}`;
+    els.dailyBestStreak.textContent=`${streak.best} day${streak.best===1?'':'s'}`;
+    els.dailyHistory.innerHTML=rows.join('');
+  }
+  function beginStudyVisit(){ controller.studyVisitSerial++; controller.studyCountedKey=''; resetDictationInteraction(); }
   function markStudiedOnce(s,mode){
-    if(!s || isKnown(s,mode) || !['listening','reading','review'].includes(mode)) return false;
+    if(!s || isKnown(s,mode) || !['listening','reading','review','dictation'].includes(mode)) return false;
     const visitKey=`${controller.studyVisitSerial}|${studyKey(s)}|${mode}`;
     if(controller.studyCountedKey===visitKey) return false;
     const e=studyEntry(s,true); e[mode]=(Number(e[mode])||0)+1;
+    recordDailyStudy(mode);
     controller.studyCountedKey=visitKey;
-    saveState(); renderStudyCounters();
+    saveState(); renderStudyCounters(); renderDailyProgress();
     return true;
   }
   function renderStudyCounters(){
     if(!els.currentStudyCounts || !els.allStudyCounts) return;
     const e=studyEntry(sentence(),false);
-    const currentTotal=(e.listening||0)+(e.reading||0)+(e.review||0);
+    const currentTotal=(e.listening||0)+(e.reading||0)+(e.review||0)+(e.dictation||0);
     const t=studyTotals();
-    els.currentStudyCounts.textContent=`Listening ${e.listening||0} · Reading ${e.reading||0} · Review ${e.review||0} · Total ${currentTotal}`;
-    els.allStudyCounts.textContent=`Listening ${t.listening} · Reading ${t.reading} · Review ${t.review} · Total ${t.total}`;
+    els.currentStudyCounts.textContent=`Listening ${e.listening||0} · Reading ${e.reading||0} · Review ${e.review||0} · Dictation ${e.dictation||0} · Total ${currentTotal}`;
+    els.allStudyCounts.textContent=`Listening ${t.listening} · Reading ${t.reading} · Review ${t.review} · Dictation ${t.dictation} · Total ${t.total}`;
     els.counterResetActions?.classList.toggle('hidden',!counterResetUnlocked);
     if(els.enableCounterReset) els.enableCounterReset.checked=counterResetUnlocked;
   }
   function resetStudyMode(mode){
-    const labels={listening:'Listening',reading:'Reading',review:'Review'};
+    const labels={listening:'Listening',reading:'Reading',review:'Review',dictation:'Dictation'};
     if(!labels[mode]) return;
     if(!confirm(`Reset the ${labels[mode]} study count across all sentences? This cannot be undone.`)) return;
     normalizeStudyHistory();
     Object.values(state.studyHistory).forEach(v=>{ v[mode]=0; });
-    Object.keys(state.studyHistory).forEach(k=>{ const v=state.studyHistory[k]; if(!(v.listening||v.reading||v.review)) delete state.studyHistory[k]; });
+    Object.keys(state.studyHistory).forEach(k=>{ const v=state.studyHistory[k]; if(!(v.listening||v.reading||v.review||v.dictation)) delete state.studyHistory[k]; });
     beginStudyVisit(); saveState(); renderStudyCounters();
   }
   function resetAllStudyCounts(){
-    if(!confirm('Reset ALL Listening, Reading and Review study counts? This cannot be undone.')) return;
+    if(!confirm('Reset ALL Listening, Reading, Review and Dictation study counts? This cannot be undone.')) return;
     state.studyHistory={}; beginStudyVisit(); saveState(); renderStudyCounters();
   }
 
@@ -992,6 +1243,7 @@
     els.modeChinese.classList.toggle('active',state.mode==='chinese');
     els.modeReading.classList.toggle('active',state.mode==='reading');
     els.modeEnglish.classList.toggle('active',state.mode==='english');
+    els.modeDictation.classList.toggle('active',state.mode==='dictation');
     els.repeatCount.value=String(state.repeatCount);
     els.speechRate.value=String(state.speechRate);
     els.showEnglish.checked=state.showEnglish; els.showPinyin.checked=state.showPinyin; els.randomizeVoices.checked=state.randomizeVoices!==false;
@@ -1008,7 +1260,7 @@
     fillGapSelect(els.currentGap,true,l,s);
     els.currentGap.value=s?.gapOverride==null?'default':String(s.gapOverride);
     const shownGap=listeningPlaybackGap(s,l); const extra=(Number(state.repeatCount)===2 && s?.gapOverride==null)?' Read twice adds 1 second to default gaps.':''; els.effectiveGap.textContent=`Effective listening gap: ${shownGap} seconds. It is used in Mandarin Listening between repeated readings and before the next sentence.${extra}`;
-    els.listeningGapControls.classList.remove('hidden');
+    els.listeningGapControls.classList.toggle('hidden',state.mode==='dictation');
     const kc=knownCount(l);
     const kcs=knownCounts(l);
     const activeKnownLabel=knownModeLabel();
@@ -1021,27 +1273,61 @@
     els.allKnownToggleText.textContent=`Mark all ${activeKnownLabel} sentences known / skip`;
     els.allKnownStatus.textContent=kc===0?`No sentences are marked known in ${activeKnownLabel}.`:kc===l.sentences.length?`All sentences are known in ${activeKnownLabel} and will be skipped in this mode.`:`${kc} of ${l.sentences.length} sentences are known in ${activeKnownLabel} and will be skipped in this mode.`;
     const readingText=l.readingOverrideEnabled===true?'reading override active':'individual reading settings';
-    els.lessonName.textContent=l.name; els.lessonMeta.textContent=`${l.sentences.length} sentences · Known: Listening ${kcs.listening}, Reading ${kcs.reading}, Review ${kcs.review} · ${readingText} · listening default gap ${globalGapLabel(l)}`;
+    els.lessonName.textContent=l.name; els.lessonMeta.textContent=`${l.sentences.length} sentences · Known: Listening ${kcs.listening}, Reading ${kcs.reading}, Review ${kcs.review}, Dictation ${kcs.dictation} · ${readingText} · listening default gap ${globalGapLabel(l)}`;
     const listVisible=l.listVisible!==false;
     els.list.classList.toggle('hidden',!listVisible);
     els.toggleLessonList.textContent=listVisible?'Hide sentence list':'Show sentence list';
     els.toggleLessonList.setAttribute('aria-expanded',String(listVisible));
 
-    renderCurrent(); renderList(); renderVocabulary(); renderStudyCounters(); updatePlayButtons();
+    renderCurrent(); renderList(); renderVocabulary(); renderStudyCounters(); renderDailyProgress(); updatePlayButtons();
   }
 
   function renderCurrent(){
     const l=activeLesson(), s=sentence(); if(!l||!s) return;
     els.counter.textContent=`Sentence ${l.currentIndex+1} of ${l.sentences.length}`;
     const currentKnownCounts=knownCounts(l);
-    els.knownCounter.textContent=`Known · Listening ${currentKnownCounts.listening}/${l.sentences.length} · Reading ${currentKnownCounts.reading}/${l.sentences.length} · Review ${currentKnownCounts.review}/${l.sentences.length}`;
-    els.knownCounter.title="Known status is stored independently for Mandarin Listening, Mandarin Reading, and English Review. Only the current mode\'s Known status controls skipping.";
+    els.knownCounter.textContent=`Known · Listening ${currentKnownCounts.listening}/${l.sentences.length} · Reading ${currentKnownCounts.reading}/${l.sentences.length} · Review ${currentKnownCounts.review}/${l.sentences.length} · Dictation ${currentKnownCounts.dictation}/${l.sentences.length}`;
+    els.knownCounter.title="Known status is stored independently for Mandarin Listening, Mandarin Reading, English Review, and Dictation. Only the current mode's Known status controls skipping.";
     const englishMode=state.mode==='english';
     const readingMode=state.mode==='reading';
+    const dictationMode=state.mode==='dictation';
     renderChineseInteractive(els.chinese,s.chinese,l,s,l.currentIndex);
     els.chinese.classList.toggle('known-chinese',isKnown(s));
     els.english.textContent=s.english;
     els.pinyin.textContent=s.pinyin||'';
+
+    if(dictationMode){
+      els.englishActions.classList.add('hidden');
+      els.readingActions.classList.add('hidden');
+      els.dictationActions.classList.remove('hidden');
+      const reveal=controller.dictationCorrect || controller.dictationRevealed;
+      els.chinese.classList.toggle('hidden',!reveal);
+      els.english.classList.toggle('hidden',!reveal);
+      els.pinyin.classList.toggle('hidden',!reveal || !s.pinyin);
+      els.dictationRepeatCount.value=String(state.dictationRepeatCount||1);
+      els.dictationLength.value=state.dictationLength||'all';
+      if(document.activeElement!==els.dictationInput) els.dictationInput.value=controller.dictationUserAnswer||'';
+      const locked=isKnown(s,'dictation') || controller.dictationCorrect || controller.dictationRevealed;
+      els.dictationListen.disabled=isKnown(s,'dictation');
+      els.dictationInput.disabled=isKnown(s,'dictation') || controller.dictationCorrect || controller.dictationRevealed;
+      els.dictationCheck.disabled=isKnown(s,'dictation') || controller.dictationCorrect || controller.dictationRevealed || !controller.dictationUserAnswer.trim();
+      els.dictationTryAgain.classList.toggle('hidden',controller.dictationAttempts===0 || controller.dictationCorrect || controller.dictationRevealed || controller.dictationAttempts>=3);
+      els.dictationShowAnswer.classList.toggle('hidden',controller.dictationCorrect || controller.dictationRevealed);
+      els.dictationNext.classList.toggle('hidden',!(controller.dictationCorrect || controller.dictationRevealed));
+      const attempts=Math.min(3,controller.dictationAttempts);
+      els.dictationStatus.textContent=isKnown(s,'dictation')
+        ? 'This sentence is Known in Dictation and is skipped during Dictation navigation.'
+        : `Attempt ${attempts}/3 · ${controller.dictationHeard?'Audio played':'Listen before answering if needed.'}`;
+      const dt=dictationTotals();
+      const firstRate=dt.sessions?Math.round((dt.firstTryCorrect/dt.sessions)*100):0;
+      els.dictationStats.textContent=`Dictation stats · sessions ${dt.sessions} · checks ${dt.checks} · correct first try ${firstRate}% · correct after retry ${dt.retryCorrect} · known ${knownCount(l,'dictation')}/${l.sentences.length}`;
+      if(controller.dictationAttempts===0 && !controller.dictationCorrect && !controller.dictationRevealed){
+        els.dictationFeedback.className='dictation-feedback hidden'; els.dictationFeedback.textContent='';
+        els.dictationDiff.classList.add('hidden'); els.dictationDiff.innerHTML='';
+      }
+      return;
+    }
+    els.dictationActions.classList.add('hidden');
 
     if(englishMode){
       els.english.classList.remove('hidden');
@@ -1096,13 +1382,20 @@
     if(l.listVisible===false){ els.list.innerHTML=''; return; }
     els.list.innerHTML='';
     const readingMode=state.mode==='reading';
+    const dictationMode=state.mode==='dictation';
     l.sentences.forEach((s,i)=>{
       const row=document.createElement('div'); row.className='row'+(i===l.currentIndex?' active':'')+(isKnown(s)?' known':''); row.dataset.index=i;
       const readingControls=readingMode ? `<div class="row-reading-controls"><label class="toggle"><input class="reading-en-row" type="checkbox" /> English</label><label class="toggle"><input class="reading-py-row" type="checkbox" /> Pinyin</label><label class="toggle"><input class="reading-auto-row" type="checkbox" /> Auto advance</label></div>` : '';
-      row.innerHTML=`<div class="row-top"><div class="row-num">${i+1}</div><div class="row-text"><div class="row-en"></div><div class="row-zh"></div><div class="row-py"></div></div></div><div class="row-controls">${readingControls}<div><label class="small">Listening gap</label><select class="sentence-gap"></select></div><label class="toggle master-known"><input class="known-row-toggle" type="checkbox" /> Known in ${knownModeLabel()} · skip</label></div>`;
-      const en=row.querySelector('.row-en'); en.textContent=s.english;
-      renderChineseInteractive(row.querySelector('.row-zh'),s.chinese,l,s,i,true);
-      const py=row.querySelector('.row-py'); py.textContent=s.pinyin||'';
+      const gapControl=dictationMode?'':`<div><label class="small">Listening gap</label><select class="sentence-gap"></select></div>`;
+      row.innerHTML=`<div class="row-top"><div class="row-num">${i+1}</div><div class="row-text"><div class="row-en"></div><div class="row-zh"></div><div class="row-py"></div></div></div><div class="row-controls">${readingControls}${gapControl}<label class="toggle master-known"><input class="known-row-toggle" type="checkbox" /> Known in ${knownModeLabel()} · skip</label></div>`;
+      const en=row.querySelector('.row-en');
+      const zh=row.querySelector('.row-zh');
+      const py=row.querySelector('.row-py');
+      if(dictationMode){
+        en.textContent='Dictation sentence · text hidden'; en.classList.add('dictation-hidden-row'); zh.textContent=''; py.textContent='';
+      }else{
+        en.textContent=s.english; renderChineseInteractive(zh,s.chinese,l,s,i,true); py.textContent=s.pinyin||'';
+      }
       if(readingMode){
         en.classList.toggle('hidden',!effectiveReadingSetting(s,l,'english'));
         py.classList.toggle('hidden',!effectiveReadingSetting(s,l,'pinyin')||!s.pinyin);
@@ -1112,12 +1405,14 @@
         e.addEventListener('change',ev=>{s.readingShowEnglish=ev.target.checked;saveState();render();});
         p.addEventListener('change',ev=>{s.readingShowPinyin=ev.target.checked;saveState();render();});
         a.addEventListener('change',ev=>{stopPlayback(false);s.readingAutoAdvance=ev.target.checked;saveState();render();});
-      }else{
+      }else if(!dictationMode){
         en.classList.remove('hidden');
         py.classList.toggle('hidden',!state.showPinyin||!s.pinyin);
       }
-      const sel=row.querySelector('.sentence-gap'); fillGapSelect(sel,true,l,s); sel.value=s.gapOverride==null?'default':String(s.gapOverride);
-      sel.addEventListener('change',ev=>{ s.gapOverride=ev.target.value==='default'?null:Number(ev.target.value); saveState(); if(i===l.currentIndex){ render(); } });
+      const sel=row.querySelector('.sentence-gap');
+      if(sel){ fillGapSelect(sel,true,l,s); sel.value=s.gapOverride==null?'default':String(s.gapOverride);
+        sel.addEventListener('change',ev=>{ s.gapOverride=ev.target.value==='default'?null:Number(ev.target.value); saveState(); if(i===l.currentIndex){ render(); } });
+      }
       const kt=row.querySelector('.known-row-toggle'); kt.checked=isKnown(s); kt.addEventListener('change',ev=>{ setKnown(s,ev.target.checked); saveState(); render(); });
       row.addEventListener('click',ev=>{ if(['SELECT','OPTION','BUTTON','INPUT','LABEL'].includes(ev.target.tagName)) return; stopPlayback(false); l.currentIndex=i; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); scrollCurrentIntoView(); });
       els.list.appendChild(row);
@@ -1326,7 +1621,65 @@
     controller.playing=false; updatePlayButtons(); render();
   }
 
-  function startPlayback(){ beginStudyVisit(); if(state.mode==='chinese') playChineseLoop(); else if(state.mode==='reading') playReadingLoop(); else playEnglishReview(); }
+  async function playDictationAudio(){
+    const s=sentence(); if(!s || state.mode!=='dictation' || isKnown(s,'dictation')) return;
+    speechSynthesis.cancel(); controller.playing=true; controller.paused=false; controller.dictationHeard=true;
+    const runId=++controller.runId; updatePlayButtons(); renderCurrent();
+    const voice=chooseSpeechVoice();
+    try{
+      const times=Number(state.dictationRepeatCount)||1;
+      for(let i=0;i<times;i++){
+        const r=await speak(s.chinese,runId,voice); if(r==='cancelled' || runId!==controller.runId) return;
+        if(i<times-1){ const w=await waitSeconds(1,runId); if(w==='cancelled') return; }
+      }
+    }catch(e){ console.error(e); alert('Unable to use this Mandarin voice.'); }
+    if(runId===controller.runId){ controller.playing=false; updatePlayButtons(); renderCurrent(); }
+  }
+  function checkDictationAnswer(){
+    const s=sentence(); if(!s || state.mode!=='dictation' || controller.dictationCorrect || controller.dictationRevealed || isKnown(s,'dictation')) return;
+    const raw=controller.dictationUserAnswer||els.dictationInput.value||'';
+    if(!raw.trim()) return;
+    controller.dictationAttempts=Math.min(3,controller.dictationAttempts+1);
+    const e=dictationEntry(s,true); e.checks++;
+    const user=normalizeDictationAnswer(raw), expected=normalizeDictationAnswer(s.chinese);
+    const distance=dictationDistance(user,expected);
+    if(user===expected){
+      controller.dictationCorrect=true;
+      completeDictationSession(s,controller.dictationAttempts===1?'first':'retry');
+      els.dictationFeedback.className='dictation-feedback correct';
+      els.dictationFeedback.textContent=controller.dictationAttempts===1?'✓ Correct on the first attempt.':'✓ Correct.';
+      els.dictationDiff.classList.remove('hidden');
+      els.dictationDiff.innerHTML=`<strong>Answer:</strong> ${escapeHTML(s.chinese)}`;
+    }else{
+      const close=distance<=Math.max(1,Math.ceil(expected.length*0.18));
+      els.dictationFeedback.className=`dictation-feedback ${close?'almost':'incorrect'}`;
+      els.dictationFeedback.textContent=controller.dictationAttempts>=3 ? `✗ Not correct after 3 attempts. The answer is now shown.` : (close?'Almost. The highlighted part of your answer needs attention.':'Not correct yet. Listen again or try once more.');
+      els.dictationDiff.classList.remove('hidden');
+      if(controller.dictationAttempts>=3){
+        controller.dictationRevealed=true; completeDictationSession(s,'failed');
+        els.dictationDiff.innerHTML=`<div><strong>Your answer:</strong> ${dictationUserDiffHTML(raw,s.chinese)}</div><div><strong>Correct:</strong> ${dictationExpectedDiffHTML(raw,s.chinese)}</div>`;
+      }else{
+        els.dictationDiff.innerHTML=`<strong>Your answer:</strong> ${dictationUserDiffHTML(raw,s.chinese)}<div class="tiny">The correct characters remain hidden until you solve it, use Show answer, or reach the third attempt.</div>`;
+      }
+      saveState();
+    }
+    renderCurrent();
+  }
+  function revealDictationAnswer(){
+    const s=sentence(); if(!s || state.mode!=='dictation' || controller.dictationCorrect || controller.dictationRevealed) return;
+    const raw=controller.dictationUserAnswer||els.dictationInput.value||'';
+    controller.dictationRevealed=true; completeDictationSession(s,'failed');
+    els.dictationFeedback.className='dictation-feedback incorrect';
+    els.dictationFeedback.textContent='Answer revealed.';
+    els.dictationDiff.classList.remove('hidden');
+    els.dictationDiff.innerHTML=raw.trim()?`<div><strong>Your answer:</strong> ${dictationUserDiffHTML(raw,s.chinese)}</div><div><strong>Correct:</strong> ${dictationExpectedDiffHTML(raw,s.chinese)}</div>`:`<strong>Correct:</strong> ${escapeHTML(s.chinese)}`;
+    renderCurrent();
+  }
+
+  function startPlayback(){
+    if(state.mode==='dictation'){ playDictationAudio(); return; }
+    beginStudyVisit(); if(state.mode==='chinese') playChineseLoop(); else if(state.mode==='reading') playReadingLoop(); else playEnglishReview();
+  }
   function stopPlayback(renderAfter=true){
     controller.playing=false; controller.paused=false; controller.manualContinue=false; resetTemporaryReveals(); controller.runId++;
     if(controller.pendingTimer){ clearTimeout(controller.pendingTimer); controller.pendingTimer=null; }
@@ -1341,9 +1694,11 @@
   function updatePlayButtons(){
     const l=activeLesson(), s=sentence();
     if(state.mode==='reading') els.play.textContent=controller.playing?'↻ Restart auto':'▶ Auto advance';
+    else if(state.mode==='dictation') els.play.textContent=controller.playing?'↻ Replay':'🔊 Hear sentence';
     else els.play.textContent=controller.playing?'↻ Restart':'▶ Start';
     els.pause.textContent=controller.paused?'▶ Resume':'Ⅱ Pause';
     if(l&&s&&state.mode==='reading') els.play.disabled=!effectiveReadingSetting(s,l,'auto');
+    else if(l&&s&&state.mode==='dictation') els.play.disabled=isKnown(s,'dictation');
   }
 
   function move(delta){
@@ -1352,7 +1707,11 @@
     stopPlayback(false);
     if(delta>0 && state.mode==='reading') markStudiedOnce(current,'reading');
     if(delta>0 && state.mode==='english') markStudiedOnce(current,'review');
-    if(delta>0 && l.currentIndex>=l.sentences.length-1) l.currentIndex=0;
+    if(state.mode==='dictation'){
+      const target=nextDictationIndex(l,l.currentIndex+(delta>0?1:-1),delta);
+      if(target>=0) l.currentIndex=target;
+      else if(delta>0){ const first=nextDictationIndex(l,0,1); l.currentIndex=first>=0?first:0; }
+    }else if(delta>0 && l.currentIndex>=l.sentences.length-1) l.currentIndex=0;
     else l.currentIndex=Math.max(0,Math.min(l.sentences.length-1,l.currentIndex+delta));
     beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); scrollCurrentIntoView();
   }
@@ -1377,6 +1736,7 @@
   els.modeChinese.addEventListener('click',()=>{ stopPlayback(false); state.mode='chinese'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
   els.modeReading.addEventListener('click',()=>{ stopPlayback(false); state.mode='reading'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
   els.modeEnglish.addEventListener('click',()=>{ stopPlayback(false); state.mode='english'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
+  els.modeDictation.addEventListener('click',()=>{ stopPlayback(false); state.mode='dictation'; beginStudyVisit(); resetTemporaryReveals(); const l=activeLesson(); if(l && (!dictationEligible(sentence()) || isKnown(sentence(),'dictation'))){ const n=nextDictationIndex(l,0,1); if(n>=0) l.currentIndex=n; } saveState(); render(); });
   els.repeatCount.addEventListener('change',()=>{ state.repeatCount=Number(els.repeatCount.value); saveState(); render(); });
   els.globalGap.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; l.globalGap=els.globalGap.value==='auto'?'auto':Number(els.globalGap.value); saveState(); render(); });
   els.currentGap.addEventListener('change',()=>{ const s=sentence(); if(!s)return; s.gapOverride=els.currentGap.value==='default'?null:Number(els.currentGap.value); saveState(); render(); });
@@ -1440,10 +1800,20 @@
       renderCurrent();
     }
   });
+  els.dictationRepeatCount.addEventListener('change',()=>{ state.dictationRepeatCount=Number(els.dictationRepeatCount.value)===2?2:1; saveState(); renderCurrent(); });
+  els.dictationLength.addEventListener('change',()=>{ state.dictationLength=els.dictationLength.value==='short'?'short':'all'; const l=activeLesson(); if(l && state.mode==='dictation' && !dictationEligible(sentence())){ const n=nextDictationIndex(l,0,1); if(n>=0) l.currentIndex=n; beginStudyVisit(); } saveState(); render(); });
+  els.dictationListen.addEventListener('click',playDictationAudio);
+  els.dictationInput.addEventListener('input',()=>{ controller.dictationUserAnswer=els.dictationInput.value; els.dictationCheck.disabled=!controller.dictationUserAnswer.trim() || controller.dictationCorrect || controller.dictationRevealed; });
+  els.dictationInput.addEventListener('keydown',ev=>{ if((ev.key==='Enter' && (ev.ctrlKey||ev.metaKey))){ ev.preventDefault(); checkDictationAnswer(); } });
+  els.dictationCheck.addEventListener('click',checkDictationAnswer);
+  els.dictationTryAgain.addEventListener('click',()=>{ if(controller.dictationAttempts>=3||controller.dictationCorrect||controller.dictationRevealed)return; controller.dictationUserAnswer=''; els.dictationInput.value=''; els.dictationFeedback.className='dictation-feedback hidden'; els.dictationDiff.classList.add('hidden'); els.dictationDiff.innerHTML=''; renderCurrent(); setTimeout(()=>els.dictationInput.focus(),0); });
+  els.dictationShowAnswer.addEventListener('click',revealDictationAnswer);
+  els.dictationNext.addEventListener('click',()=>move(1));
   els.enableCounterReset.addEventListener('change',()=>{ counterResetUnlocked=els.enableCounterReset.checked; renderStudyCounters(); });
   els.resetListeningCount.addEventListener('click',()=>resetStudyMode('listening'));
   els.resetReadingCount.addEventListener('click',()=>resetStudyMode('reading'));
   els.resetReviewCount.addEventListener('click',()=>resetStudyMode('review'));
+  els.resetDictationCount.addEventListener('click',()=>resetStudyMode('dictation'));
   els.resetAllCounts.addEventListener('click',resetAllStudyCounts);
   els.toggleLessonList.addEventListener('click',()=>{
     const l=activeLesson(); if(!l) return;
@@ -1481,12 +1851,12 @@
     fillGapSelect(els.globalGap,false); fillGapSelect(els.currentGap,true,{globalGap:'auto'},null);
     try{ db=await openDB(); await loadState(); }catch(e){ console.warn('IndexedDB unavailable',e); }
     if(!Array.isArray(state.lessons)) state.lessons=[];
-    state.lessons=state.lessons.slice(0,MAX_LESSONS).map(l=>({...l,globalGap:l.globalGap==='auto'?'auto':(GAP_OPTIONS.includes(Number(l.globalGap))?Number(l.globalGap):2),currentIndex:Math.max(0,Math.min(Number(l.currentIndex)||0,(l.sentences?.length||1)-1)),listVisible:l.listVisible!==false,readingOverrideEnabled:l.readingOverrideEnabled===true,readingGeneralEnglish:l.readingGeneralEnglish===true,readingGeneralPinyin:l.readingGeneralPinyin===true,readingGeneralAuto:l.readingGeneralAuto===true,sentences:(l.sentences||[]).map(s=>{ const legacyKnown=s.known===true; const n={...s,knownListening:s.knownListening===true||legacyKnown,knownReading:s.knownReading===true||legacyKnown,knownReview:s.knownReview===true||legacyKnown,gapOverride:GAP_OPTIONS.includes(Number(s.gapOverride))?Number(s.gapOverride):null,readingShowEnglish:s.readingShowEnglish===true,readingShowPinyin:s.readingShowPinyin===true,readingAutoAdvance:s.readingAutoAdvance===true}; delete n.known; return n; })}));
+    state.lessons=state.lessons.slice(0,MAX_LESSONS).map(l=>({...l,globalGap:l.globalGap==='auto'?'auto':(GAP_OPTIONS.includes(Number(l.globalGap))?Number(l.globalGap):2),currentIndex:Math.max(0,Math.min(Number(l.currentIndex)||0,(l.sentences?.length||1)-1)),listVisible:l.listVisible!==false,readingOverrideEnabled:l.readingOverrideEnabled===true,readingGeneralEnglish:l.readingGeneralEnglish===true,readingGeneralPinyin:l.readingGeneralPinyin===true,readingGeneralAuto:l.readingGeneralAuto===true,sentences:(l.sentences||[]).map(s=>{ const legacyKnown=s.known===true; const n={...s,knownListening:s.knownListening===true||legacyKnown,knownReading:s.knownReading===true||legacyKnown,knownReview:s.knownReview===true||legacyKnown,knownDictation:s.knownDictation===true,gapOverride:GAP_OPTIONS.includes(Number(s.gapOverride))?Number(s.gapOverride):null,readingShowEnglish:s.readingShowEnglish===true,readingShowPinyin:s.readingShowPinyin===true,readingAutoAdvance:s.readingAutoAdvance===true}; delete n.known; return n; })}));
     if(!state.activeId || !state.lessons.some(l=>l.id===state.activeId)) state.activeId=state.lessons[0]?.id||null;
-    state.mode=['chinese','reading','english'].includes(state.mode)?state.mode:'chinese';
+    state.mode=['chinese','reading','english','dictation'].includes(state.mode)?state.mode:'chinese';
     state.repeatCount=[1,2].includes(Number(state.repeatCount))?Number(state.repeatCount):1;
     state.speechRate=Number(state.speechRate)||1;
-    state.showEnglish=state.showEnglish!==false; state.showPinyin=state.showPinyin!==false; state.randomizeVoices=state.randomizeVoices!==false; normalizeStudyHistory(); counterResetUnlocked=false;
+    state.showEnglish=state.showEnglish!==false; state.showPinyin=state.showPinyin!==false; state.randomizeVoices=state.randomizeVoices!==false; normalizeStudyHistory(); normalizeDictationHistory(); state.dictationRepeatCount=Number(state.dictationRepeatCount)===2?2:1; state.dictationLength=state.dictationLength==='short'?'short':'all'; counterResetUnlocked=false;
     if(!Array.isArray(state.difficultWords)) state.difficultWords=[];
     state.difficultWords=state.difficultWords.filter(x=>x&&typeof x.word==='string'&&x.word.trim()&&x.source).map(x=>({...x,word:x.word.trim()}));
     normalizeVocabulary();
