@@ -1,10 +1,10 @@
 {
-  "name": "Mandarin Listening Practice",
+  "name": "Mandarin Practice v5.14",
   "short_name": "Mandarin",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#f6f6f3",
+  "theme_color": "#111111",
   "lang": "en"
 }

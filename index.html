@@ -174,6 +174,38 @@
     .vocab-exposure{margin-top:9px;padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:#fafafa;font-size:.82rem;line-height:1.5;color:#444}
     .dictation-suggestions{margin-top:10px;padding:10px;border:1px dashed #d7b25a;border-radius:11px;background:#fff9e8;font-size:.84rem}
     .dictation-suggestion-list{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+  
+    /* v5.14 navigation + clean views */
+    .app-nav{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:0 0 12px;position:sticky;top:0;z-index:45;background:rgba(246,246,243,.96);backdrop-filter:blur(12px);padding:8px 0}
+    .app-nav button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 5px;font-size:.78rem;font-weight:750;white-space:nowrap}
+    .app-nav button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .app-nav button:disabled{opacity:.4}
+    .view-hidden{display:none!important}
+    .mode-switch.v514{grid-template-columns:repeat(2,1fr)}
+    @media(min-width:650px){.mode-switch.v514{grid-template-columns:repeat(5,1fr)}}
+    .lesson-vocab-summary{margin:10px 0 2px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fafafa;font-size:.82rem;line-height:1.5}
+    .lesson-vocab-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+    .lesson-vocab-pill{display:inline-flex;border-radius:999px;padding:4px 8px;background:#efefec;font-size:.74rem;font-weight:750}
+    .lesson-vocab-pill.new{background:#e8f0ff;color:#244b78}.lesson-vocab-pill.learning{background:#fff0a8;color:#594b00}.lesson-vocab-pill.familiar{background:#dff1df;color:#214d21}.lesson-vocab-pill.known{background:#e7ecef;color:#3a4b55}.lesson-vocab-pill.encountered{background:#f0e9fb;color:#4b326b}
+    .word-token.vocab-new{background:#e8f0ff}.word-token.vocab-learning{background:#fff0a8}.word-token.vocab-familiar{border-bottom:2px solid #afd0af}.word-token.vocab-known{color:#777}
+    .conversation-actions{padding:2px 0 4px}
+    .conversation-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+    @media(min-width:700px){.conversation-toolbar{grid-template-columns:150px 220px 1fr}}
+    .conversation-history{max-height:30vh;overflow:auto;display:flex;flex-direction:column;gap:7px;margin:10px 0;padding:8px;border:1px solid var(--line);border-radius:14px;background:#fafafa}
+    .conversation-bubble{max-width:88%;border-radius:14px;padding:9px 11px;font-size:.9rem;line-height:1.45}
+    .conversation-bubble.app{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+    .conversation-bubble.user{align-self:flex-end;background:var(--accent)}
+    .conversation-bubble.reaction{align-self:flex-start;background:#f0f0ec;color:#444}
+    .conversation-prompt{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff;margin:10px 0}
+    .conversation-zh{font-size:1.7rem;font-weight:750;line-height:1.4;margin:8px 0}.conversation-py{color:var(--muted);margin:4px 0}.conversation-en{font-size:.95rem;margin:4px 0}
+    .conversation-input{min-height:86px;font-size:1.15rem;line-height:1.5}
+    .conversation-status{font-size:.8rem;color:var(--muted);line-height:1.45;margin-top:8px}
+    .conversation-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:10px}
+    @media(min-width:650px){.conversation-stats{grid-template-columns:repeat(4,1fr)}}
+    .conversation-stat{border:1px solid var(--line);border-radius:11px;padding:8px;background:#fafafa}.conversation-stat strong{display:block;font-size:1.25rem;margin-top:2px}
+    .mic-active{background:#ffe8e5!important;border-color:#d4746a!important}
+    .compact-note{font-size:.78rem;color:var(--muted);line-height:1.4}
+
   </style>
 </head>
 <body>
@@ -181,7 +213,7 @@
     <header>
       <div>
         <h1>Mandarin Listening Practice</h1>
-        <div class="sub">15-lesson offline workspace · Listening · Reading · Review · Dictation</div>
+        <div class="sub">15-lesson offline workspace · Listening · Reading · Review · Dictation · Conversation</div>
       </div>
       <div>
         <div class="status" id="appStatus">Starting…</div>
@@ -189,7 +221,15 @@
       </div>
     </header>
 
-    <section class="card">
+    <nav class="app-nav" id="appNav" aria-label="App sections">
+      <button type="button" id="viewStudyBtn" data-view="study">Study</button>
+      <button type="button" id="viewLessonsBtn" data-view="lessons">Lessons</button>
+      <button type="button" id="viewVocabularyBtn" data-view="vocabulary">Vocabulary</button>
+      <button type="button" id="viewProgressBtn" data-view="progress">Progress</button>
+      <button type="button" id="viewSettingsBtn" data-view="settings">Settings</button>
+    </nav>
+
+    <section class="card" id="lessonTabsCard">
       <div class="tabs" id="lessonTabs"></div>
     </section>
 
@@ -211,16 +251,17 @@
     </section>
 
     <div id="workspace" class="hidden">
-      <section class="card">
-        <div class="mode-switch">
+      <section class="card" id="modeCard">
+        <div class="mode-switch v514">
           <button id="modeChinese">Mandarin listening</button>
           <button id="modeReading">Mandarin reading</button>
           <button id="modeEnglish">English review</button>
           <button id="modeDictation">Dictation</button>
+          <button id="modeConversation">Conversation</button>
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" id="settingsCard">
         <div class="settings-grid">
           <div>
             <label class="small">Listening: Chinese readings</label>
@@ -245,6 +286,14 @@
           <div>
             <label class="small">Mandarin voice (fallback / single voice)</label>
             <select id="voiceSelect"></select>
+          </div>
+          <div>
+            <label class="small">Reading vocabulary highlighting</label>
+            <select id="vocabHighlightMode">
+              <option value="off">Off</option>
+              <option value="learning">Learning only</option>
+              <option value="new-learning">New + learning</option>
+            </select>
           </div>
         </div>
         <div class="btnrow" style="margin-top:10px">
@@ -310,7 +359,7 @@
           <div class="daily-box">
             <div class="study-count-title">Today</div>
             <div class="daily-big" id="dailyTodayTotal">0</div>
-            <div class="daily-breakdown" id="dailyTodayBreakdown">Listening 0 · Reading 0 · Review 0 · Dictation 0</div>
+            <div class="daily-breakdown" id="dailyTodayBreakdown">Listening 0 · Reading 0 · Review 0 · Dictation 0 · Conversation 0</div>
           </div>
           <div class="daily-box">
             <div class="study-count-title">Last 7 days</div>
@@ -330,19 +379,19 @@
       <section class="card" id="vocabularyExposureCard">
         <div class="study-counter-head">
           <div>
-            <strong>Vocabulary exposure · v5.13B</strong>
+            <strong>Vocabulary exposure · v5.14</strong>
             <div class="tiny">Every completed sentence study is segmented automatically. You do not need to tap words for them to be counted. Listening read twice counts as one sentence encounter.</div>
           </div>
           <span class="mode-badge" id="exposureTrackingStatus">Automatic</span>
         </div>
         <div class="exposure-grid">
           <div class="exposure-box"><div class="study-count-title">Tracked unique words</div><div class="exposure-big" id="exposureUniqueWords">0</div><div class="tiny">Includes automatically encountered words.</div></div>
-          <div class="exposure-box"><div class="study-count-title">Total word encounters</div><div class="exposure-big" id="exposureTotalEncounters">0</div><div class="tiny">Across all four study modes.</div></div>
+          <div class="exposure-box"><div class="study-count-title">Total word encounters</div><div class="exposure-big" id="exposureTotalEncounters">0</div><div class="tiny">Across study modes plus Conversation listening.</div></div>
           <div class="exposure-box"><div class="study-count-title">Saved word status</div><div class="exposure-big" id="exposureKnownWords">0 known</div><div class="tiny" id="exposureSavedStatus">Learning 0 · Familiar 0 · Difficult 0</div></div>
-          <div class="exposure-box"><div class="study-count-title">Mode encounters</div><div class="exposure-modes" id="exposureModeTotals">L 0 · R 0 · Review 0 · D 0</div></div>
+          <div class="exposure-box"><div class="study-count-title">Mode encounters</div><div class="exposure-modes" id="exposureModeTotals">L 0 · R 0 · Review 0 · D 0 · Conversation 0</div></div>
         </div>
         <div style="margin-top:10px"><strong class="small">Frequently encountered content words</strong><div class="tracked-cloud" id="exposureTopWords"></div></div>
-        <div class="tiny" style="margin-top:9px">A word is <strong>not</strong> promoted to Known merely because it has many encounters. New / Learning / Familiar / Known remain your deliberate vocabulary statuses. v5.13 reconstructs earlier exposure totals from the sentence study counts already stored by previous versions.</div>
+        <div class="tiny" style="margin-top:9px">A word is <strong>not</strong> promoted to Known merely because it has many encounters. New / Learning / Familiar / Known remain your deliberate vocabulary statuses. v5.14 keeps the v5.13 reconstructed exposure totals from the sentence study counts already stored by previous versions.</div>
         <div class="profile-actions">
           <button class="btn" id="exportProfileBtn" type="button">Export Learning Profile</button>
           <button class="btn ghost" id="importProfileBtn" type="button">Import Learning Profile</button>
@@ -351,7 +400,47 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" id="studyCard">
+        <div id="conversationActions" class="conversation-actions hidden">
+          <div class="study-counter-head">
+            <div><strong>Conversation</strong><div class="tiny">Short structured A1–A2 dialogue. Listen first, then answer in Chinese. Typed input always works; microphone input is offered when the browser supports it.</div></div>
+            <span class="mode-badge" id="conversationLevelBadge">A1</span>
+          </div>
+          <div class="conversation-toolbar">
+            <div><label class="small">Level</label><select id="conversationLevel"><option value="a1">A1 · very simple</option><option value="a2">A2 · short natural dialogue</option></select></div>
+            <div><label class="small">Situation</label><select id="conversationTopic"><option value="daily">Daily life</option><option value="work">Work</option><option value="travel">Travel</option><option value="friends">Friends</option><option value="random">Random mix</option></select></div>
+            <div class="btnrow" style="align-items:end"><button class="btn ghost" id="conversationNewBtn" type="button">New conversation</button></div>
+          </div>
+          <div class="conversation-history" id="conversationHistory"><div class="tiny">Your current conversation will appear here.</div></div>
+          <div class="conversation-prompt">
+            <div class="tiny">Current turn · listen before revealing text</div>
+            <div class="conversation-zh hidden" id="conversationPromptChinese"></div>
+            <div class="conversation-py hidden" id="conversationPromptPinyin"></div>
+            <div class="conversation-en hidden" id="conversationPromptEnglish"></div>
+            <div class="btnrow" style="margin-top:9px">
+              <button class="btn accent" id="conversationListenBtn" type="button">🔊 Listen</button>
+              <button class="btn" id="conversationUnderstoodBtn" type="button">✓ I understood</button>
+              <button class="btn ghost" id="conversationShowChineseBtn" type="button">Show Chinese</button>
+              <button class="btn ghost" id="conversationShowPinyinBtn" type="button">Show pinyin</button>
+              <button class="btn ghost" id="conversationShowEnglishBtn" type="button">Show English</button>
+            </div>
+          </div>
+          <textarea id="conversationInput" class="conversation-input" inputmode="text" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="Answer in Chinese…"></textarea>
+          <div class="btnrow" style="margin-top:8px">
+            <button class="btn primary" id="conversationSendBtn" type="button">Send answer</button>
+            <button class="btn ghost" id="conversationMicBtn" type="button">🎙 Speak</button>
+            <button class="btn ghost" id="conversationClearBtn" type="button">Clear</button>
+          </div>
+          <div class="conversation-status" id="conversationFeedback"></div>
+          <div class="conversation-stats">
+            <div class="conversation-stat"><span class="tiny">Turns completed</span><strong id="conversationTurns">0</strong></div>
+            <div class="conversation-stat"><span class="tiny">Prompt words heard</span><strong id="conversationHeard">0</strong></div>
+            <div class="conversation-stat"><span class="tiny">Words comprehended</span><strong id="conversationComprehended">0</strong></div>
+            <div class="conversation-stat"><span class="tiny">Words actively used</span><strong id="conversationActiveWords">0</strong></div>
+          </div>
+          <div class="compact-note" style="margin-top:8px">A prompt word counts as comprehended when you tap “I understood” or answer before revealing help. Words in your Chinese answer count as active use. If you reveal Chinese/pinyin/English first, active use is recorded as prompted rather than spontaneous.</div>
+        </div>
+        <div id="sentenceStudyContent">
         <div class="current-progress">
           <div class="counter" id="counter"></div>
           <div class="known-counter" id="knownCounter" aria-live="polite">Known: 0 / 0</div>
@@ -429,6 +518,7 @@
         </div>
         <div class="auto-note">Listening gaps can be automatic or manually overridden. When Listening is set to Read twice, default/file-level gaps are extended by 1 second; manual per-sentence gap overrides stay exact. In Mandarin reading mode, automatic advance always uses the same character-length pattern and ignores listening gap overrides.</div>
         <div class="notice" style="margin-top:10px">Words in each completed study sentence are now tracked automatically. Tap a Chinese word only when you want to save/manage it in <strong>Vocabulary &amp; Phrases</strong>. Saved vocabulary and exposure history remain even if you remove the lesson.</div>
+        </div>
       </section>
 
       <section class="card hidden" id="vocabCard">
@@ -505,7 +595,7 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" id="lessonManagerCard">
         <div class="btnrow" style="justify-content:space-between;align-items:center;margin-bottom:10px">
           <div>
             <strong id="lessonName"></strong>
@@ -522,6 +612,7 @@
             <button class="btn danger" id="removeLessonBtn">Remove lesson</button>
           </div>
         </div>
+        <div class="lesson-vocab-summary" id="lessonVocabSummary"></div>
         <div class="lesson-list" id="lessonList"></div>
       </section>
     </div>
@@ -531,7 +622,7 @@
     </section>
   </div>
 
-  <div class="sticky">
+  <div class="sticky" id="transportBar">
     <div class="sticky-inner">
       <button class="btn" id="prevBtn">◀ Prev</button>
       <button class="btn primary" id="playBtn">▶ Start</button>
@@ -553,7 +644,7 @@
 <script>
 (() => {
   'use strict';
-  const APP_VERSION = '5.13B';
+  const APP_VERSION = '5.14';
   const MAX_LESSONS = 15;
   const GAP_OPTIONS = [2,3,4,5,7,10];
   const DB_NAME = 'mandarin-listening-workspace';
@@ -566,18 +657,18 @@
   const $ = id => document.getElementById(id);
   const els = {
     status:$('appStatus'), wakeStatus:$('wakeStatus'), tabs:$('lessonTabs'), fileInput:$('fileInput'), fileStatus:$('fileStatus'), pasteBox:$('pasteBox'), loadPaste:$('loadPasteBtn'),
-    workspace:$('workspace'), empty:$('emptyCard'), modeChinese:$('modeChinese'), modeReading:$('modeReading'), modeEnglish:$('modeEnglish'), modeDictation:$('modeDictation'), repeatCount:$('repeatCount'), globalGap:$('globalGap'),
-    speechRate:$('speechRate'), voiceSelect:$('voiceSelect'), showEnglish:$('showEnglish'), showPinyin:$('showPinyin'), randomizeVoices:$('randomizeVoices'), testVoice:$('testVoiceBtn'), voiceWarning:$('voiceWarning'), voiceVariationStatus:$('voiceVariationStatus'), toggleVocab:$('toggleVocabBtn'), vocabCount:$('vocabCount'),
+    workspace:$('workspace'), empty:$('emptyCard'), appNav:$('appNav'), viewStudy:$('viewStudyBtn'), viewLessons:$('viewLessonsBtn'), viewVocabulary:$('viewVocabularyBtn'), viewProgress:$('viewProgressBtn'), viewSettings:$('viewSettingsBtn'), lessonTabsCard:$('lessonTabsCard'), loadCard:$('loadCard'), modeCard:$('modeCard'), settingsCard:$('settingsCard'), studyCard:$('studyCard'), lessonManagerCard:$('lessonManagerCard'), transportBar:$('transportBar'), modeChinese:$('modeChinese'), modeReading:$('modeReading'), modeEnglish:$('modeEnglish'), modeDictation:$('modeDictation'), modeConversation:$('modeConversation'), repeatCount:$('repeatCount'), globalGap:$('globalGap'),
+    speechRate:$('speechRate'), voiceSelect:$('voiceSelect'), vocabHighlightMode:$('vocabHighlightMode'), showEnglish:$('showEnglish'), showPinyin:$('showPinyin'), randomizeVoices:$('randomizeVoices'), testVoice:$('testVoiceBtn'), voiceWarning:$('voiceWarning'), voiceVariationStatus:$('voiceVariationStatus'), toggleVocab:$('toggleVocabBtn'), vocabCount:$('vocabCount'),
     vocabCard:$('vocabCard'), vocabFilter:$('vocabFilter'), vocabStatusFilter:$('vocabStatusFilter'), vocabTypeFilter:$('vocabTypeFilter'), vocabEmpty:$('vocabEmpty'), vocabContent:$('vocabContent'), vocabCounter:$('vocabCounter'), vocabWord:$('vocabWord'), vocabBadges:$('vocabBadges'), vocabStatus:$('vocabStatus'), vocabType:$('vocabType'), vocabDifficult:$('vocabDifficult'), vocabEnglish:$('vocabEnglish'), vocabChinese:$('vocabChinese'), vocabPinyin:$('vocabPinyin'), vocabSource:$('vocabSource'), vocabExposure:$('vocabExposure'), vocabContexts:$('vocabContexts'), vocabPrev:$('vocabPrevBtn'), vocabNext:$('vocabNextBtn'), playWord:$('playWordBtn'), playSource:$('playSourceBtn'), removeWord:$('removeWordBtn'), exportVocabulary:$('exportVocabularyBtn'), exportWords:$('exportWordsBtn'), exportRevision:$('exportRevisionBtn'), vocabList:$('vocabList'), vocabAddInput:$('vocabAddInput'), vocabAddType:$('vocabAddType'), vocabAdd:$('vocabAddBtn'), vocabUseSelection:$('vocabUseSelectionBtn'),
     counter:$('counter'), knownCounter:$('knownCounter'), currentStudyCounts:$('currentStudyCounts'), allStudyCounts:$('allStudyCounts'), dailyStreak:$('dailyStreak'), dailyTodayTotal:$('dailyTodayTotal'), dailyTodayBreakdown:$('dailyTodayBreakdown'), dailyWeekTotal:$('dailyWeekTotal'), dailyWeekBreakdown:$('dailyWeekBreakdown'), dailyBestStreak:$('dailyBestStreak'), dailyHistory:$('dailyHistory'), exposureTrackingStatus:$('exposureTrackingStatus'), exposureUniqueWords:$('exposureUniqueWords'), exposureTotalEncounters:$('exposureTotalEncounters'), exposureKnownWords:$('exposureKnownWords'), exposureSavedStatus:$('exposureSavedStatus'), exposureModeTotals:$('exposureModeTotals'), exposureTopWords:$('exposureTopWords'), exportProfile:$('exportProfileBtn'), importProfile:$('importProfileBtn'), importProfileInput:$('importProfileInput'), enableCounterReset:$('enableCounterReset'), counterResetActions:$('counterResetActions'), resetListeningCount:$('resetListeningCount'), resetReadingCount:$('resetReadingCount'), resetReviewCount:$('resetReviewCount'), resetDictationCount:$('resetDictationCount'), resetAllCounts:$('resetAllCounts'), english:$('englishText'), chinese:$('chineseText'), pinyin:$('pinyinText'), englishActions:$('englishReviewActions'), revealChinese:$('revealChineseBtn'), listenHiddenMandarin:$('listenHiddenMandarinBtn'), revealReviewPinyin:$('revealReviewPinyinBtn'),
     readRevealed:$('readRevealedBtn'), continueEnglish:$('continueEnglishBtn'), readingGeneralSettings:$('readingGeneralSettings'), readingOverrideEnabled:$('readingOverrideEnabled'), readingGeneralOptions:$('readingGeneralOptions'), readingGeneralEnglish:$('readingGeneralEnglish'), readingGeneralPinyin:$('readingGeneralPinyin'), readingGeneralAuto:$('readingGeneralAuto'), readingGeneralStatus:$('readingGeneralStatus'), readingActions:$('readingActions'), readingSentenceEnglish:$('readingSentenceEnglish'), readingSentencePinyin:$('readingSentencePinyin'), readingSentenceAuto:$('readingSentenceAuto'), readingPlayOnce:$('readingPlayOnceBtn'), readingSentenceStatus:$('readingSentenceStatus'), dictationActions:$('dictationActions'), dictationRepeatCount:$('dictationRepeatCount'), dictationLength:$('dictationLength'), dictationListen:$('dictationListenBtn'), dictationInput:$('dictationInput'), dictationCheck:$('dictationCheckBtn'), dictationTryAgain:$('dictationTryAgainBtn'), dictationShowAnswer:$('dictationShowAnswerBtn'), dictationNext:$('dictationNextBtn'), dictationFeedback:$('dictationFeedback'), dictationDiff:$('dictationDiff'), dictationStatus:$('dictationStatus'), dictationStats:$('dictationStats'), listeningGapControls:$('listeningGapControls'), currentGap:$('currentGap'), effectiveGap:$('effectiveGapLabel'), lessonName:$('lessonName'), lessonMeta:$('lessonMeta'),
-    knownToggle:$('knownToggle'), knownToggleText:$('knownToggleText'), knownBadge:$('knownBadge'), allKnownToggle:$('allKnownToggle'), allKnownToggleText:$('allKnownToggleText'), allActive:$('allActiveBtn'), allKnownStatus:$('allKnownStatus'), toggleLessonList:$('toggleLessonListBtn'), rename:$('renameBtn'), remove:$('removeLessonBtn'), list:$('lessonList'), prev:$('prevBtn'), play:$('playBtn'), pause:$('pauseBtn'), stop:$('stopBtn'), next:$('nextBtn'),
-    replaceDialog:$('replaceDialog'), replaceList:$('replaceList'), cancelReplace:$('cancelReplaceBtn')
+    knownToggle:$('knownToggle'), knownToggleText:$('knownToggleText'), knownBadge:$('knownBadge'), allKnownToggle:$('allKnownToggle'), allKnownToggleText:$('allKnownToggleText'), allActive:$('allActiveBtn'), allKnownStatus:$('allKnownStatus'), toggleLessonList:$('toggleLessonListBtn'), rename:$('renameBtn'), remove:$('removeLessonBtn'), lessonVocabSummary:$('lessonVocabSummary'), list:$('lessonList'), prev:$('prevBtn'), play:$('playBtn'), pause:$('pauseBtn'), stop:$('stopBtn'), next:$('nextBtn'),
+    conversationActions:$('conversationActions'), sentenceStudyContent:$('sentenceStudyContent'), conversationLevel:$('conversationLevel'), conversationTopic:$('conversationTopic'), conversationNew:$('conversationNewBtn'), conversationHistory:$('conversationHistory'), conversationPromptChinese:$('conversationPromptChinese'), conversationPromptPinyin:$('conversationPromptPinyin'), conversationPromptEnglish:$('conversationPromptEnglish'), conversationListen:$('conversationListenBtn'), conversationUnderstood:$('conversationUnderstoodBtn'), conversationShowChinese:$('conversationShowChineseBtn'), conversationShowPinyin:$('conversationShowPinyinBtn'), conversationShowEnglish:$('conversationShowEnglishBtn'), conversationInput:$('conversationInput'), conversationSend:$('conversationSendBtn'), conversationMic:$('conversationMicBtn'), conversationClear:$('conversationClearBtn'), conversationFeedback:$('conversationFeedback'), conversationTurns:$('conversationTurns'), conversationHeard:$('conversationHeard'), conversationComprehended:$('conversationComprehended'), conversationActiveWords:$('conversationActiveWords'), conversationLevelBadge:$('conversationLevelBadge'), replaceDialog:$('replaceDialog'), replaceList:$('replaceList'), cancelReplace:$('cancelReplaceBtn')
   };
 
   let state = {
-    lessons: [], activeId: null, mode: 'chinese', repeatCount: 1, speechRate: 1, showEnglish: true, showPinyin: true, voiceURI: '',
-    difficultWords: [], vocabulary: [], vocabMigrationDone: false, vocabOpen: false, vocabFilter: 'all', vocabStatusFilter: 'all', vocabTypeFilter: 'all', vocabIndex: 0, randomizeVoices: true, studyHistory: {}, dailyProgress: {}, dictationHistory: {}, wordExposure: {}, wordExposureMigrationDone: false, dictationRepeatCount: 1, dictationLength: 'all'
+    lessons: [], activeId: null, mode: 'chinese', view: 'study', repeatCount: 1, speechRate: 1, showEnglish: true, showPinyin: true, voiceURI: '',
+    difficultWords: [], vocabulary: [], vocabMigrationDone: false, vocabOpen: false, vocabFilter: 'all', vocabStatusFilter: 'all', vocabTypeFilter: 'all', vocabIndex: 0, vocabHighlightMode: 'learning', randomizeVoices: true, studyHistory: {}, dailyProgress: {}, dictationHistory: {}, wordExposure: {}, wordExposureMigrationDone: false, dictationRepeatCount: 1, dictationLength: 'all', conversation: {level:'a1',topic:'daily',index:0,history:[],promptHeard:false,promptComprehended:false,helpUsed:false,sessionId:0}, conversationStats: {turns:0,promptWordsHeard:0,wordsComprehended:0,activeWords:0,activeSpontaneous:0,activePrompted:0}
   };
   let db = null;
   let voices = [];
@@ -714,18 +805,19 @@
     if(mode==='reading') return 'reading';
     if(mode==='english' || mode==='review') return 'review';
     if(mode==='dictation') return 'dictation';
+    if(mode==='conversation') return 'conversation';
     return 'listening';
   }
   function knownModeLabel(mode=state.mode){
     const m=knownMode(mode);
-    return m==='listening'?'Listening':m==='reading'?'Reading':m==='review'?'Review':'Dictation';
+    return m==='listening'?'Listening':m==='reading'?'Reading':m==='review'?'Review':m==='dictation'?'Dictation':'Conversation';
   }
   function knownField(mode=state.mode){
     const m=knownMode(mode);
-    return m==='listening'?'knownListening':m==='reading'?'knownReading':m==='review'?'knownReview':'knownDictation';
+    return m==='listening'?'knownListening':m==='reading'?'knownReading':m==='review'?'knownReview':m==='dictation'?'knownDictation':null;
   }
-  function isKnown(s,mode=state.mode){ return s?.[knownField(mode)]===true; }
-  function setKnown(s,value,mode=state.mode){ if(s) s[knownField(mode)]=value===true; }
+  function isKnown(s,mode=state.mode){ const f=knownField(mode); return f ? s?.[f]===true : false; }
+  function setKnown(s,value,mode=state.mode){ const f=knownField(mode); if(s&&f) s[f]=value===true; }
   function nextPlayableIndex(l,start,mode=state.mode){
     if(!l) return -1;
     for(let i=Math.max(0,start);i<l.sentences.length;i++) if(!isKnown(l.sentences[i],mode)) return i;
@@ -929,17 +1021,17 @@
     if(!state.dailyProgress || typeof state.dailyProgress!=='object' || Array.isArray(state.dailyProgress)) state.dailyProgress={};
     for(const [day,v] of Object.entries(state.dailyProgress)){
       if(!dayFromKey(day) || !v || typeof v!=='object'){ delete state.dailyProgress[day]; continue; }
-      ['listening','reading','review','dictation'].forEach(k=>v[k]=Math.max(0,Number(v[k])||0));
+      ['listening','reading','review','dictation','conversation'].forEach(k=>v[k]=Math.max(0,Number(v[k])||0));
     }
   }
   function dailyEntry(day=localDayKey(),create=false){
     normalizeDailyProgress();
-    if(!state.dailyProgress[day] && create) state.dailyProgress[day]={listening:0,reading:0,review:0,dictation:0};
-    return state.dailyProgress[day] || {listening:0,reading:0,review:0,dictation:0};
+    if(!state.dailyProgress[day] && create) state.dailyProgress[day]={listening:0,reading:0,review:0,dictation:0,conversation:0};
+    return state.dailyProgress[day] || {listening:0,reading:0,review:0,dictation:0,conversation:0};
   }
-  function dailyTotal(e){ return (Number(e?.listening)||0)+(Number(e?.reading)||0)+(Number(e?.review)||0)+(Number(e?.dictation)||0); }
+  function dailyTotal(e){ return (Number(e?.listening)||0)+(Number(e?.reading)||0)+(Number(e?.review)||0)+(Number(e?.dictation)||0)+(Number(e?.conversation)||0); }
   function recordDailyStudy(mode){
-    if(!['listening','reading','review','dictation'].includes(mode)) return;
+    if(!['listening','reading','review','dictation','conversation'].includes(mode)) return;
     const e=dailyEntry(localDayKey(),true);
     e[mode]=(Number(e[mode])||0)+1;
     e.updatedAt=Date.now();
@@ -969,7 +1061,7 @@
     const today=dailyEntry(todayKey,false);
     const todayTotal=dailyTotal(today);
     els.dailyTodayTotal.textContent=String(todayTotal);
-    els.dailyTodayBreakdown.textContent=`Listening ${today.listening||0} · Reading ${today.reading||0} · Review ${today.review||0} · Dictation ${today.dictation||0}`;
+    els.dailyTodayBreakdown.textContent=`Listening ${today.listening||0} · Reading ${today.reading||0} · Review ${today.review||0} · Dictation ${today.dictation||0} · Conversation ${today.conversation||0}`;
     let weekTotal=0, activeDays=0;
     const rows=[];
     const fmt=new Intl.DateTimeFormat(undefined,{weekday:'short',day:'numeric',month:'short'});
@@ -978,7 +1070,7 @@
       const key=localDayKey(d), e=dailyEntry(key,false), total=dailyTotal(e);
       weekTotal+=total; if(total>0) activeDays++;
       const label=offset===0?'Today':offset===1?'Yesterday':fmt.format(d);
-      rows.push(`<div class="daily-row"><div>${escapeHTML(label)}</div><div class="daily-row-modes">L ${e.listening||0} · R ${e.reading||0} · Review ${e.review||0} · D ${e.dictation||0}</div><div class="daily-row-total">${total}</div></div>`);
+      rows.push(`<div class="daily-row"><div>${escapeHTML(label)}</div><div class="daily-row-modes">L ${e.listening||0} · R ${e.reading||0} · Review ${e.review||0} · D ${e.dictation||0} · C ${e.conversation||0}</div><div class="daily-row-total">${total}</div></div>`);
     }
     const streak=streakStats();
     els.dailyWeekTotal.textContent=String(weekTotal);
@@ -1031,8 +1123,8 @@
       if(!term || !hasChinese(term) || !v || typeof v!=='object'){ delete state.wordExposure[term]; continue; }
       v.term=term;
       v.type=v.type==='phrase'?'phrase':'word';
-      ['listening','reading','review','dictation','dictationErrors'].forEach(k=>v[k]=Math.max(0,Number(v[k])||0));
-      v.total=(Number(v.listening)||0)+(Number(v.reading)||0)+(Number(v.review)||0)+(Number(v.dictation)||0);
+      ['listening','reading','review','dictation','dictationErrors','conversationHeard','conversationComprehended','conversationActive','conversationPrompted'].forEach(k=>v[k]=Math.max(0,Number(v[k])||0));
+      v.total=(Number(v.listening)||0)+(Number(v.reading)||0)+(Number(v.review)||0)+(Number(v.dictation)||0)+(Number(v.conversationHeard)||0);
       v.firstSeen=Number(v.firstSeen)||0; v.lastSeen=Number(v.lastSeen)||0;
       v.sources=Array.isArray(v.sources)?v.sources.filter(Boolean).slice(-8):[];
     }
@@ -1040,7 +1132,7 @@
   function exposureEntry(term,create=false,type='word'){
     term=(term||'').trim(); normalizeWordExposure();
     if(!term || !hasChinese(term)) return null;
-    if(!state.wordExposure[term] && create) state.wordExposure[term]={term,type:type==='phrase'?'phrase':'word',listening:0,reading:0,review:0,dictation:0,total:0,dictationErrors:0,firstSeen:Date.now(),lastSeen:Date.now(),sources:[]};
+    if(!state.wordExposure[term] && create) state.wordExposure[term]={term,type:type==='phrase'?'phrase':'word',listening:0,reading:0,review:0,dictation:0,conversationHeard:0,conversationComprehended:0,conversationActive:0,conversationPrompted:0,total:0,dictationErrors:0,firstSeen:Date.now(),lastSeen:Date.now(),sources:[]};
     const e=state.wordExposure[term]||null; if(e && type==='phrase') e.type='phrase'; return e;
   }
   function chineseOccurrenceCount(text,term){
@@ -1082,9 +1174,9 @@
     state.wordExposureMigrationDone=true;
   }
   function exposureTotals(){
-    normalizeWordExposure(); const t={uniqueWords:0,uniquePhrases:0,listening:0,reading:0,review:0,dictation:0,total:0};
-    Object.values(state.wordExposure).forEach(e=>{ if(e.type==='phrase') t.uniquePhrases++; else t.uniqueWords++; ['listening','reading','review','dictation'].forEach(k=>t[k]+=Number(e[k])||0); });
-    t.total=t.listening+t.reading+t.review+t.dictation; return t;
+    normalizeWordExposure(); const t={uniqueWords:0,uniquePhrases:0,listening:0,reading:0,review:0,dictation:0,conversationHeard:0,conversationComprehended:0,conversationActive:0,total:0};
+    Object.values(state.wordExposure).forEach(e=>{ if(e.type==='phrase') t.uniquePhrases++; else t.uniqueWords++; ['listening','reading','review','dictation','conversationHeard','conversationComprehended','conversationActive'].forEach(k=>t[k]+=Number(e[k])||0); });
+    t.total=t.listening+t.reading+t.review+t.dictation+t.conversationHeard; return t;
   }
   function savedWordStatusTotals(){
     normalizeVocabulary(); const t={new:0,learning:0,familiar:0,known:0,difficult:0};
@@ -1094,12 +1186,12 @@
     if(!els.exposureUniqueWords) return; normalizeWordExposure(); const t=exposureTotals(), s=savedWordStatusTotals();
     els.exposureUniqueWords.textContent=String(t.uniqueWords); els.exposureTotalEncounters.textContent=String(t.total);
     els.exposureKnownWords.textContent=`${s.known} known`; els.exposureSavedStatus.textContent=`New ${s.new} · Learning ${s.learning} · Familiar ${s.familiar} · Difficult ${s.difficult}`;
-    els.exposureModeTotals.textContent=`Listening ${t.listening} · Reading ${t.reading} · Review ${t.review} · Dictation ${t.dictation}`;
+    els.exposureModeTotals.textContent=`Listening ${t.listening} · Reading ${t.reading} · Review ${t.review} · Dictation ${t.dictation} · Conversation heard ${t.conversationHeard} · comprehended ${t.conversationComprehended} · active ${t.conversationActive}`;
     els.exposureTrackingStatus.textContent=state.wordExposureMigrationDone?'Automatic · active':'Preparing…';
     els.exposureTopWords.innerHTML='';
     const top=Object.values(state.wordExposure).filter(e=>e.type!=='phrase' && !EXPOSURE_STOPWORDS.has(e.term)).sort((a,b)=>(b.total||0)-(a.total||0)||a.term.localeCompare(b.term,'zh')).slice(0,12);
     if(!top.length){ els.exposureTopWords.innerHTML='<span class="tiny">Complete a sentence study to begin tracking.</span>'; return; }
-    top.forEach(e=>{ const b=document.createElement('button'); b.className='tracked-chip'; b.type='button'; b.innerHTML=`${escapeHTML(e.term)} <strong>${e.total||0}</strong>`; b.title='Save/open this word in Vocabulary & Phrases'; b.addEventListener('click',()=>{ const existing=vocabularyEntry(e.term); if(existing){ state.vocabOpen=true; state.vocabFilter='all';state.vocabStatusFilter='all';state.vocabTypeFilter='all'; const items=filteredVocabulary(true); state.vocabIndex=Math.max(0,items.findIndex(x=>x.term===e.term)); saveState(); render(); } else addVocabularyTerm(e.term,'word',null,null,0,true); }); els.exposureTopWords.appendChild(b); });
+    top.forEach(e=>{ const b=document.createElement('button'); b.className='tracked-chip'; b.type='button'; b.innerHTML=`${escapeHTML(e.term)} <strong>${e.total||0}</strong>`; b.title='Save/open this word in Vocabulary & Phrases'; b.addEventListener('click',()=>{ const existing=vocabularyEntry(e.term); if(existing){ state.vocabOpen=true; state.view='vocabulary'; state.vocabFilter='all';state.vocabStatusFilter='all';state.vocabTypeFilter='all'; const items=filteredVocabulary(true); state.vocabIndex=Math.max(0,items.findIndex(x=>x.term===e.term)); saveState(); render(); } else addVocabularyTerm(e.term,'word',null,null,0,true); }); els.exposureTopWords.appendChild(b); });
   }
   function backfillSpecificExposure(term,type='word'){
     term=(term||'').trim(); if(!term || exposureEntry(term,false)) return; normalizeStudyHistory();
@@ -1111,7 +1203,7 @@
   }
   function learningProfileSnapshot(){
     normalizeVocabulary(); normalizeStudyHistory(); normalizeDailyProgress(); normalizeDictationHistory(); normalizeWordExposure();
-    return {schema:'mandarin-learning-profile',schemaVersion:1,appVersion:APP_VERSION,exportedAt:new Date().toISOString(),vocabulary:state.vocabulary,difficultWords:state.difficultWords||[],studyHistory:state.studyHistory,dailyProgress:state.dailyProgress,dictationHistory:state.dictationHistory,wordExposure:state.wordExposure,wordExposureMigrationDone:true};
+    return {schema:'mandarin-learning-profile',schemaVersion:1,appVersion:APP_VERSION,exportedAt:new Date().toISOString(),vocabulary:state.vocabulary,difficultWords:state.difficultWords||[],studyHistory:state.studyHistory,dailyProgress:state.dailyProgress,dictationHistory:state.dictationHistory,wordExposure:state.wordExposure,wordExposureMigrationDone:true,conversationStats:state.conversationStats};
   }
   function exportLearningProfile(){
     const blob=new Blob([JSON.stringify(learningProfileSnapshot(),null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -1121,7 +1213,7 @@
     if(!file) return; let p; try{ p=JSON.parse(await file.text()); }catch(e){ alert('This is not a valid Learning Profile JSON file.'); return; }
     if(!p || p.schema!=='mandarin-learning-profile'){ alert('This file is not a Mandarin Learning Profile export.'); return; }
     if(!confirm('Restore the learning data from this profile? Loaded lesson files and their Known/skip states will stay as they are. Current vocabulary and learning statistics will be replaced by the profile.')) return;
-    state.vocabulary=Array.isArray(p.vocabulary)?p.vocabulary:[]; state.difficultWords=Array.isArray(p.difficultWords)?p.difficultWords:[]; state.studyHistory=p.studyHistory&&typeof p.studyHistory==='object'?p.studyHistory:{}; state.dailyProgress=p.dailyProgress&&typeof p.dailyProgress==='object'?p.dailyProgress:{}; state.dictationHistory=p.dictationHistory&&typeof p.dictationHistory==='object'?p.dictationHistory:{}; state.wordExposure=p.wordExposure&&typeof p.wordExposure==='object'?p.wordExposure:{}; state.wordExposureMigrationDone=p.wordExposureMigrationDone!==false;
+    state.vocabulary=Array.isArray(p.vocabulary)?p.vocabulary:[]; state.difficultWords=Array.isArray(p.difficultWords)?p.difficultWords:[]; state.studyHistory=p.studyHistory&&typeof p.studyHistory==='object'?p.studyHistory:{}; state.dailyProgress=p.dailyProgress&&typeof p.dailyProgress==='object'?p.dailyProgress:{}; state.dictationHistory=p.dictationHistory&&typeof p.dictationHistory==='object'?p.dictationHistory:{}; state.wordExposure=p.wordExposure&&typeof p.wordExposure==='object'?p.wordExposure:{}; state.wordExposureMigrationDone=p.wordExposureMigrationDone!==false; state.conversationStats=p.conversationStats&&typeof p.conversationStats==='object'?p.conversationStats:state.conversationStats;
     normalizeVocabulary(); normalizeStudyHistory(); normalizeDailyProgress(); normalizeDictationHistory(); normalizeWordExposure(); saveState(); render(); alert('Learning Profile restored.');
   }
   function dictationDifficultyCandidates(s,raw){
@@ -1203,7 +1295,7 @@
     const filtered=filteredVocabulary(true);
     const idx=filtered.findIndex(x=>x.term===entry.term);
     state.vocabIndex=idx>=0?idx:Math.max(0,state.vocabulary.indexOf(entry));
-    if(open) state.vocabOpen=true;
+    if(open){ state.vocabOpen=true; state.view='vocabulary'; }
     saveState(); render();
     return true;
   }
@@ -1239,7 +1331,8 @@
     segmentChinese(text).forEach(part=>{
       if(!part.word){ container.appendChild(document.createTextNode(part.text)); return; }
       const marked=isSavedVocabulary(part.text);
-      const b=document.createElement('button'); b.type='button'; b.className='word-token'+(marked?' marked':''); b.textContent=part.text;
+      let highlight=''; if(state.mode==='reading' && state.vocabHighlightMode!=='off'){ const cls=vocabularyClassForTerm(part.text); if(cls==='learning' || (state.vocabHighlightMode==='new-learning'&&cls==='new')) highlight=` vocab-${cls}`; }
+      const b=document.createElement('button'); b.type='button'; b.className='word-token'+(marked?' marked':'')+highlight; b.textContent=part.text;
       b.title=marked?'Open saved vocabulary item':'Save to Vocabulary & Phrases';
       b.setAttribute('aria-label',`${marked?'Open':'Save'} ${part.text} ${marked?'in':'to'} Vocabulary and Phrases`);
       if(compact) b.style.padding='0 1px';
@@ -1289,8 +1382,8 @@
   function renderVocabulary(){
     normalizeVocabulary();
     els.vocabCount.textContent=String(state.vocabulary.length);
-    els.vocabCard.classList.toggle('hidden',!state.vocabOpen);
-    if(!state.vocabOpen) return;
+    const vocabVisible=state.view==='vocabulary'; els.vocabCard.classList.toggle('view-hidden',!vocabVisible); els.vocabCard.classList.remove('hidden');
+    if(!vocabVisible) return;
     populateVocabFilter();
     els.vocabStatusFilter.value=state.vocabStatusFilter||'all';
     els.vocabTypeFilter.value=state.vocabTypeFilter||'all';
@@ -1315,7 +1408,7 @@
     els.vocabPinyin.classList.toggle('hidden',!src?.pinyin);
     els.vocabSource.textContent=src?`Context: ${sourceLessonNameFromSource(src)} · sentence ${(src.sentenceIndex??0)+1}`:'No source sentence is currently stored for this item.';
     const ve=exposureEntry(entry.term,false);
-    els.vocabExposure.textContent=ve?`Exposure · Listening ${ve.listening||0} · Reading ${ve.reading||0} · Review ${ve.review||0} · Dictation ${ve.dictation||0} · Total ${ve.total||0}${ve.dictationErrors?` · Dictation errors ${ve.dictationErrors}`:''}`:'Exposure · no recorded encounters yet';
+    els.vocabExposure.textContent=ve?`Exposure · Listening ${ve.listening||0} · Reading ${ve.reading||0} · Review ${ve.review||0} · Dictation ${ve.dictation||0} · Conversation heard ${ve.conversationHeard||0} · comprehended ${ve.conversationComprehended||0} · active ${ve.conversationActive||0} · Total heard/seen ${ve.total||0}${ve.dictationErrors?` · Dictation errors ${ve.dictationErrors}`:''}`:'Exposure · no recorded encounters yet';
     els.vocabContexts.innerHTML='';
     const contexts=(entry.sources||[]).slice(0,5);
     if(contexts.length>1){
@@ -1383,6 +1476,190 @@
     GAP_OPTIONS.forEach(g=>{ const o=document.createElement('option'); o.value=String(g); o.textContent=`${g} seconds`; select.appendChild(o); });
   }
 
+
+  const CONVERSATIONS = {
+    daily:{
+      a1:[
+        {zh:'你好！你今天怎么样？',py:'Nǐ hǎo! Nǐ jīntiān zěnmeyàng?',en:'Hi! How are you today?'},
+        {zh:'你今天忙吗？',py:'Nǐ jīntiān máng ma?',en:'Are you busy today?'},
+        {zh:'你早上吃了什么？',py:'Nǐ zǎoshang chī le shénme?',en:'What did you eat this morning?'},
+        {zh:'你今天想做什么？',py:'Nǐ jīntiān xiǎng zuò shénme?',en:'What do you want to do today?'},
+        {zh:'你晚上几点回家？',py:'Nǐ wǎnshang jǐ diǎn huí jiā?',en:'What time do you go home tonight?'},
+        {zh:'你今天开心吗？为什么？',py:'Nǐ jīntiān kāixīn ma? Wèishénme?',en:'Are you happy today? Why?'}
+      ],
+      a2:[
+        {zh:'最近怎么样？工作忙不忙？',py:'Zuìjìn zěnmeyàng? Gōngzuò máng bu máng?',en:'How have you been lately? Is work busy?'},
+        {zh:'你今天有什么计划？',py:'Nǐ jīntiān yǒu shénme jìhuà?',en:'What plans do you have today?'},
+        {zh:'如果有时间，你想去哪里？',py:'Rúguǒ yǒu shíjiān, nǐ xiǎng qù nǎlǐ?',en:'If you have time, where would you like to go?'},
+        {zh:'你最近在学什么新东西？',py:'Nǐ zuìjìn zài xué shénme xīn dōngxi?',en:'What new thing are you learning recently?'},
+        {zh:'你觉得今天最重要的事是什么？',py:'Nǐ juéde jīntiān zuì zhòngyào de shì shì shénme?',en:'What do you think is the most important thing today?'},
+        {zh:'忙完以后，你一般怎么放松？',py:'Máng wán yǐhòu, nǐ yìbān zěnme fàngsōng?',en:'How do you usually relax after you finish being busy?'}
+      ]
+    },
+    work:{
+      a1:[
+        {zh:'你今天几点开始工作？',py:'Nǐ jīntiān jǐ diǎn kāishǐ gōngzuò?',en:'What time do you start work today?'},
+        {zh:'今天工作多吗？',py:'Jīntiān gōngzuò duō ma?',en:'Is there a lot of work today?'},
+        {zh:'你喜欢你的工作吗？',py:'Nǐ xǐhuan nǐ de gōngzuò ma?',en:'Do you like your work?'},
+        {zh:'你今天要见客户吗？',py:'Nǐ jīntiān yào jiàn kèhù ma?',en:'Do you have to meet a customer today?'},
+        {zh:'午饭以后你做什么？',py:'Wǔfàn yǐhòu nǐ zuò shénme?',en:'What do you do after lunch?'},
+        {zh:'你几点结束工作？',py:'Nǐ jǐ diǎn jiéshù gōngzuò?',en:'What time do you finish work?'}
+      ],
+      a2:[
+        {zh:'今天最重要的工作是什么？',py:'Jīntiān zuì zhòngyào de gōngzuò shì shénme?',en:'What is the most important work today?'},
+        {zh:'客户现在最担心什么？',py:'Kèhù xiànzài zuì dānxīn shénme?',en:'What is the customer most worried about now?'},
+        {zh:'这个问题你打算怎么解决？',py:'Zhège wèntí nǐ dǎsuàn zěnme jiějué?',en:'How do you plan to solve this problem?'},
+        {zh:'你需要同事帮你吗？',py:'Nǐ xūyào tóngshì bāng nǐ ma?',en:'Do you need a colleague to help you?'},
+        {zh:'如果客户不同意，你会怎么说？',py:'Rúguǒ kèhù bù tóngyì, nǐ huì zěnme shuō?',en:'If the customer does not agree, what will you say?'},
+        {zh:'今天的会议结果怎么样？',py:'Jīntiān de huìyì jiéguǒ zěnmeyàng?',en:'How did today’s meeting turn out?'}
+      ]
+    },
+    travel:{
+      a1:[
+        {zh:'你想去哪里旅行？',py:'Nǐ xiǎng qù nǎlǐ lǚxíng?',en:'Where would you like to travel?'},
+        {zh:'你喜欢坐火车吗？',py:'Nǐ xǐhuan zuò huǒchē ma?',en:'Do you like taking the train?'},
+        {zh:'你想住酒店吗？',py:'Nǐ xiǎng zhù jiǔdiàn ma?',en:'Would you like to stay in a hotel?'},
+        {zh:'旅行的时候你喜欢吃什么？',py:'Lǚxíng de shíhou nǐ xǐhuan chī shénme?',en:'What do you like to eat when travelling?'},
+        {zh:'你喜欢城市还是大自然？',py:'Nǐ xǐhuan chéngshì háishi dàzìrán?',en:'Do you prefer cities or nature?'},
+        {zh:'下次你想和谁一起去？',py:'Xià cì nǐ xiǎng hé shéi yìqǐ qù?',en:'Who would you like to go with next time?'}
+      ],
+      a2:[
+        {zh:'如果有三天假，你最想去哪里？',py:'Rúguǒ yǒu sān tiān jià, nǐ zuì xiǎng qù nǎlǐ?',en:'If you had three days off, where would you most like to go?'},
+        {zh:'你旅行以前一般会准备什么？',py:'Nǐ lǚxíng yǐqián yìbān huì zhǔnbèi shénme?',en:'What do you usually prepare before travelling?'},
+        {zh:'你觉得一个人旅行怎么样？',py:'Nǐ juéde yí ge rén lǚxíng zěnmeyàng?',en:'What do you think about travelling alone?'},
+        {zh:'如果天气不好，你会改变计划吗？',py:'Rúguǒ tiānqì bù hǎo, nǐ huì gǎibiàn jìhuà ma?',en:'If the weather is bad, would you change your plans?'},
+        {zh:'你旅行时最喜欢做什么？',py:'Nǐ lǚxíng shí zuì xǐhuan zuò shénme?',en:'What do you most like doing when you travel?'},
+        {zh:'你最近一次旅行有什么特别的事？',py:'Nǐ zuìjìn yí cì lǚxíng yǒu shénme tèbié de shì?',en:'What was special about your most recent trip?'}
+      ]
+    },
+    friends:{
+      a1:[
+        {zh:'你周末常常见朋友吗？',py:'Nǐ zhōumò chángcháng jiàn péngyou ma?',en:'Do you often see friends at the weekend?'},
+        {zh:'你们喜欢一起喝咖啡吗？',py:'Nǐmen xǐhuan yìqǐ hē kāfēi ma?',en:'Do you like drinking coffee together?'},
+        {zh:'你最喜欢和朋友做什么？',py:'Nǐ zuì xǐhuan hé péngyou zuò shénme?',en:'What do you most like doing with friends?'},
+        {zh:'你们常常在哪里见面？',py:'Nǐmen chángcháng zài nǎlǐ jiànmiàn?',en:'Where do you often meet?'},
+        {zh:'你有中国朋友吗？',py:'Nǐ yǒu Zhōngguó péngyou ma?',en:'Do you have Chinese friends?'},
+        {zh:'下个周末你有计划吗？',py:'Xià ge zhōumò nǐ yǒu jìhuà ma?',en:'Do you have plans next weekend?'}
+      ],
+      a2:[
+        {zh:'你觉得好朋友最重要的特点是什么？',py:'Nǐ juéde hǎo péngyou zuì zhòngyào de tèdiǎn shì shénme?',en:'What do you think is the most important quality in a good friend?'},
+        {zh:'你最近和朋友聊了什么？',py:'Nǐ zuìjìn hé péngyou liáo le shénme?',en:'What have you talked about with friends recently?'},
+        {zh:'朋友有困难的时候，你一般怎么帮他？',py:'Péngyou yǒu kùnnan de shíhou, nǐ yìbān zěnme bāng tā?',en:'How do you usually help a friend when they have a problem?'},
+        {zh:'你喜欢提前安排还是临时决定？',py:'Nǐ xǐhuan tíqián ānpái háishi línshí juédìng?',en:'Do you prefer planning ahead or deciding at the last minute?'},
+        {zh:'如果朋友迟到，你会生气吗？',py:'Rúguǒ péngyou chídào, nǐ huì shēngqì ma?',en:'If a friend is late, do you get angry?'},
+        {zh:'你希望以后和朋友一起做什么？',py:'Nǐ xīwàng yǐhòu hé péngyou yìqǐ zuò shénme?',en:'What do you hope to do with friends in the future?'}
+      ]
+    }
+  };
+  function normalizeConversation(){
+    if(!state.conversation || typeof state.conversation!=='object') state.conversation={};
+    const c=state.conversation;
+    c.level=c.level==='a2'?'a2':'a1';
+    c.topic=['daily','work','travel','friends','random'].includes(c.topic)?c.topic:'daily';
+    c.index=Math.max(0,Number(c.index)||0); c.history=Array.isArray(c.history)?c.history.slice(-30):[];
+    c.promptHeard=c.promptHeard===true; c.promptComprehended=c.promptComprehended===true; c.helpUsed=c.helpUsed===true; c.sessionId=Number(c.sessionId)||0;
+    if(!state.conversationStats || typeof state.conversationStats!=='object') state.conversationStats={};
+    ['turns','promptWordsHeard','wordsComprehended','activeWords','activeSpontaneous','activePrompted'].forEach(k=>state.conversationStats[k]=Math.max(0,Number(state.conversationStats[k])||0));
+  }
+  function conversationPool(){
+    normalizeConversation();
+    const c=state.conversation;
+    if(c.topic==='random') return ['daily','work','travel','friends'].flatMap(k=>CONVERSATIONS[k][c.level].map(x=>({...x,topic:k})));
+    return CONVERSATIONS[c.topic][c.level].map(x=>({...x,topic:c.topic}));
+  }
+  function currentConversationPrompt(){ const pool=conversationPool(); if(!pool.length) return null; return pool[state.conversation.index%pool.length]; }
+  function resetConversationTurn(){ normalizeConversation(); state.conversation.promptHeard=false; state.conversation.promptComprehended=false; state.conversation.helpUsed=false; if(els.conversationInput) els.conversationInput.value=''; }
+  function newConversation(){ normalizeConversation(); state.conversation.index=0; state.conversation.history=[]; state.conversation.sessionId=Date.now(); state.conversation.showChinese=false; state.conversation.showPinyin=false; state.conversation.showEnglish=false; resetConversationTurn(); saveState(); renderConversation(); if(state.mode==='conversation')setTimeout(()=>speakConversationPrompt(),150); }
+  function conversationSource(prompt){ return {lessonId:'conversation',lessonName:'Conversation',sentenceIndex:state.conversation.index,english:prompt?.en||'',chinese:prompt?.zh||'',pinyin:prompt?.py||''}; }
+  function recordConversationPrompt(kind){
+    const p=currentConversationPrompt(); if(!p) return 0; normalizeWordExposure();
+    if(kind==='heard' && state.conversation.promptHeard) return 0;
+    if(kind==='comprehended' && state.conversation.promptComprehended) return 0;
+    const terms=trackedTermsForSentence(p.zh).filter(x=>x.type==='word'); let amount=0;
+    terms.forEach(x=>{ const e=exposureEntry(x.term,true,'word'); const n=Number(x.count)||1; if(kind==='heard'){e.conversationHeard+=n;e.total+=n;} else e.conversationComprehended+=n; e.lastSeen=Date.now(); addExposureSource(e,conversationSource(p)); amount+=n; });
+    if(kind==='heard'){ state.conversation.promptHeard=true; state.conversationStats.promptWordsHeard+=amount; }
+    else { state.conversation.promptComprehended=true; state.conversationStats.wordsComprehended+=amount; }
+    saveState(); renderVocabularyExposure(); return amount;
+  }
+  function recordConversationActive(answer,prompted=false){
+    const parts=segmentChinese(answer||'').filter(x=>x.word&&hasChinese(x.text)); let count=0;
+    parts.forEach(x=>{ const term=x.text.trim(); if(!term)return; const e=exposureEntry(term,true,'word'); e.conversationActive+=1; if(prompted)e.conversationPrompted+=1; e.lastSeen=Date.now(); count++; });
+    state.conversationStats.activeWords+=count; if(prompted)state.conversationStats.activePrompted+=count; else state.conversationStats.activeSpontaneous+=count; return count;
+  }
+  function conversationReaction(answer){
+    const a=answer||'';
+    if(/累|忙/.test(a)) return '听起来你今天有点忙。';
+    if(/喜欢/.test(a)) return '不错，我也觉得很有意思。';
+    if(/不喜欢|不想|没有|没/.test(a)) return '哦，原来是这样。';
+    if(/因为/.test(a)) return '明白了，你说得很清楚。';
+    if(/可以|会|能/.test(a)) return '很好，那听起来不错。';
+    return ['明白了。','好的，我知道了。','嗯，原来是这样。','不错，我们继续聊吧。'][state.conversationStats.turns%4];
+  }
+  function renderConversation(){
+    if(!els.conversationActions) return; normalizeConversation(); const p=currentConversationPrompt(), c=state.conversation, st=state.conversationStats;
+    els.conversationLevel.value=c.level; els.conversationTopic.value=c.topic; els.conversationLevelBadge.textContent=c.level.toUpperCase();
+    els.conversationPromptChinese.textContent=p?.zh||''; els.conversationPromptPinyin.textContent=p?.py||''; els.conversationPromptEnglish.textContent=p?.en||'';
+    els.conversationPromptChinese.classList.toggle('hidden',!c.showChinese); els.conversationPromptPinyin.classList.toggle('hidden',!c.showPinyin); els.conversationPromptEnglish.classList.toggle('hidden',!c.showEnglish);
+    els.conversationShowChinese.textContent=c.showChinese?'Hide Chinese':'Show Chinese'; els.conversationShowPinyin.textContent=c.showPinyin?'Hide pinyin':'Show pinyin'; els.conversationShowEnglish.textContent=c.showEnglish?'Hide English':'Show English';
+    els.conversationUnderstood.disabled=c.promptComprehended || !c.promptHeard;
+    els.conversationFeedback.textContent=c.promptComprehended?'Comprehension recorded for this turn.':c.helpUsed?'Help was revealed. Your answer will still count as active use, but as prompted rather than spontaneous.':'Listen and answer naturally. Grammar does not need to be perfect.';
+    els.conversationHistory.innerHTML='';
+    if(!c.history.length) els.conversationHistory.innerHTML='<div class="tiny">Conversation history will build here as you answer.</div>';
+    c.history.forEach(m=>{ const d=document.createElement('div'); d.className=`conversation-bubble ${m.role}`; d.textContent=m.text; els.conversationHistory.appendChild(d); });
+    els.conversationTurns.textContent=String(st.turns); els.conversationHeard.textContent=String(st.promptWordsHeard); els.conversationComprehended.textContent=String(st.wordsComprehended); els.conversationActiveWords.textContent=String(st.activeWords);
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition; els.conversationMic.disabled=!SR; els.conversationMic.title=SR?'Use browser speech recognition':'Speech recognition is not supported by this browser. Type your answer instead.';
+  }
+  async function speakConversationPrompt(){
+    const p=currentConversationPrompt(); if(!p)return; recordConversationPrompt('heard'); speechSynthesis.cancel(); const id=++controller.runId; try{ await speak(p.zh,id); }catch(e){ alert('Unable to use this Mandarin voice.'); } renderConversation();
+  }
+  function markConversationUnderstood(){ if(!state.conversation?.promptHeard){ els.conversationFeedback.textContent='Listen to the prompt first.'; return; } recordConversationPrompt('comprehended'); renderConversation(); }
+  function sendConversationAnswer(){
+    normalizeConversation(); const p=currentConversationPrompt(), answer=(els.conversationInput.value||'').trim(); if(!p||!answer)return;
+    if(!hasChinese(answer)){ els.conversationFeedback.textContent='Please answer in Chinese characters so active vocabulary can be counted.'; return; }
+    if(state.conversation.promptHeard && !state.conversation.promptComprehended && !state.conversation.helpUsed) recordConversationPrompt('comprehended');
+    const prompted=state.conversation.helpUsed===true; const active=recordConversationActive(answer,prompted); const reaction=conversationReaction(answer);
+    state.conversation.history.push({role:'app',text:p.zh},{role:'user',text:answer},{role:'reaction',text:reaction}); state.conversation.history=state.conversation.history.slice(-24);
+    state.conversationStats.turns+=1; recordDailyStudy('conversation'); state.conversation.index+=1; state.conversation.showChinese=false; state.conversation.showPinyin=false; state.conversation.showEnglish=false; resetConversationTurn(); saveState(); renderDailyProgress(); renderVocabularyExposure(); renderConversation();
+    els.conversationFeedback.textContent=`Response accepted · ${active} Chinese word${active===1?'':'s'} counted as ${prompted?'prompted':'spontaneous'} active use.`;
+    setTimeout(async()=>{ speechSynthesis.cancel(); const id=++controller.runId; try{ const r=await speak(reaction,id); if(r==='ended'&&id===controller.runId) await speakConversationPrompt(); }catch(e){ await speakConversationPrompt(); } },180);
+  }
+  function startConversationMic(){
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return;
+    const rec=new SR(); rec.lang='zh-CN'; rec.interimResults=false; rec.maxAlternatives=1; els.conversationMic.classList.add('mic-active'); els.conversationMic.textContent='Listening…';
+    rec.onresult=e=>{ const t=e.results?.[0]?.[0]?.transcript||''; if(t){els.conversationInput.value=t; els.conversationFeedback.textContent='Speech recognized. Check the text, then press Send answer.';} };
+    rec.onerror=()=>{els.conversationFeedback.textContent='Speech recognition was unavailable. You can type the answer instead.';};
+    rec.onend=()=>{els.conversationMic.classList.remove('mic-active');els.conversationMic.textContent='🎙 Speak';}; rec.start();
+  }
+  function vocabularyClassForTerm(term){
+    const saved=vocabularyEntry(term); if(saved){ if(saved.status==='known')return 'known'; if(saved.status==='familiar')return 'familiar'; return 'learning'; }
+    const e=exposureEntry(term,false); return e && (e.total||0)>0 ? 'encountered' : 'new';
+  }
+  function lessonVocabularyStats(l=activeLesson()){
+    const set=new Set(); if(!l)return {total:0,new:0,learning:0,familiar:0,known:0,encountered:0};
+    l.sentences.forEach(s=>segmentChinese(s.chinese||'').forEach(p=>{const t=(p.text||'').trim(); if(p.word&&t&&!EXPOSURE_STOPWORDS.has(t))set.add(t);}));
+    const out={total:set.size,new:0,learning:0,familiar:0,known:0,encountered:0}; set.forEach(t=>{out[vocabularyClassForTerm(t)]++;}); return out;
+  }
+  function renderLessonVocabularyStats(){
+    if(!els.lessonVocabSummary)return; const l=activeLesson(); if(!l){els.lessonVocabSummary.innerHTML='';return;} const s=lessonVocabularyStats(l);
+    els.lessonVocabSummary.innerHTML=`<strong>Lesson vocabulary</strong> · ${s.total} unique content words<div class="lesson-vocab-pills"><span class="lesson-vocab-pill known">Known ${s.known}</span><span class="lesson-vocab-pill familiar">Familiar ${s.familiar}</span><span class="lesson-vocab-pill learning">Learning ${s.learning}</span><span class="lesson-vocab-pill encountered">Encountered ${s.encountered}</span><span class="lesson-vocab-pill new">New ${s.new}</span></div><div class="tiny" style="margin-top:6px">Statuses use your saved vocabulary. “Encountered” means the word has exposure history but no deliberate saved status yet.</div>`;
+  }
+  function renderView(){
+    const has=!!activeLesson(); state.view=['study','lessons','vocabulary','progress','settings'].includes(state.view)?state.view:'study';
+    [els.viewStudy,els.viewLessons,els.viewVocabulary,els.viewProgress,els.viewSettings].forEach(b=>{if(b)b.classList.remove('active');});
+    const map={study:els.viewStudy,lessons:els.viewLessons,vocabulary:els.viewVocabulary,progress:els.viewProgress,settings:els.viewSettings}; map[state.view]?.classList.add('active');
+    if(els.viewStudy) els.viewStudy.disabled=!has; if(els.viewVocabulary)els.viewVocabulary.disabled=!has; if(els.viewProgress)els.viewProgress.disabled=!has; if(els.viewSettings)els.viewSettings.disabled=!has;
+    const show=(el,on)=>el?.classList.toggle('view-hidden',!on);
+    show(els.lessonTabsCard, has && (state.view==='study'||state.view==='lessons'));
+    show(els.loadCard, !has || state.view==='lessons');
+    show(els.modeCard, has && state.view==='study'); show(els.studyCard,has&&state.view==='study');
+    show(els.lessonManagerCard,has&&state.view==='lessons');
+    show(els.settingsCard,has&&state.view==='settings');
+    show($('studyCounterCard'),has&&state.view==='progress'); show($('dailyProgressCard'),has&&state.view==='progress');
+    show($('vocabularyExposureCard'),has&&state.view==='vocabulary');
+    state.vocabOpen=has&&state.view==='vocabulary';
+    if(els.transportBar) els.transportBar.classList.toggle('hidden',!(has&&state.view==='study'&&state.mode!=='conversation'));
+  }
+
   function renderTabs(){
     els.tabs.innerHTML='';
     state.lessons.forEach((l,idx)=>{
@@ -1408,12 +1685,15 @@
     els.modeReading.classList.toggle('active',state.mode==='reading');
     els.modeEnglish.classList.toggle('active',state.mode==='english');
     els.modeDictation.classList.toggle('active',state.mode==='dictation');
+    els.modeConversation.classList.toggle('active',state.mode==='conversation');
     els.repeatCount.value=String(state.repeatCount);
+    els.vocabHighlightMode.value=state.vocabHighlightMode||'learning';
     els.speechRate.value=String(state.speechRate);
     els.showEnglish.checked=state.showEnglish; els.showPinyin.checked=state.showPinyin; els.randomizeVoices.checked=state.randomizeVoices!==false;
     fillGapSelect(els.globalGap,false,l); els.globalGap.value=String(l.globalGap??'auto');
     const s=sentence();
     const readingMode=state.mode==='reading';
+    const conversationMode=state.mode==='conversation';
     els.readingGeneralSettings.classList.toggle('hidden',!readingMode);
     els.readingOverrideEnabled.checked=l.readingOverrideEnabled===true;
     els.readingGeneralEnglish.checked=l.readingGeneralEnglish===true;
@@ -1424,7 +1704,7 @@
     fillGapSelect(els.currentGap,true,l,s);
     els.currentGap.value=s?.gapOverride==null?'default':String(s.gapOverride);
     const shownGap=listeningPlaybackGap(s,l); const extra=(Number(state.repeatCount)===2 && s?.gapOverride==null)?' Read twice adds 1 second to default gaps.':''; els.effectiveGap.textContent=`Effective listening gap: ${shownGap} seconds. It is used in Mandarin Listening between repeated readings and before the next sentence.${extra}`;
-    els.listeningGapControls.classList.toggle('hidden',state.mode==='dictation');
+    els.listeningGapControls.classList.toggle('hidden',state.mode==='dictation'||state.mode==='conversation');
     const kc=knownCount(l);
     const kcs=knownCounts(l);
     const activeKnownLabel=knownModeLabel();
@@ -1443,11 +1723,15 @@
     els.toggleLessonList.textContent=listVisible?'Hide sentence list':'Show sentence list';
     els.toggleLessonList.setAttribute('aria-expanded',String(listVisible));
 
-    renderCurrent(); renderList(); renderVocabulary(); renderStudyCounters(); renderDailyProgress(); renderVocabularyExposure(); updatePlayButtons();
+    renderView(); renderCurrent(); renderList(); renderVocabulary(); renderStudyCounters(); renderDailyProgress(); renderVocabularyExposure(); renderLessonVocabularyStats(); updatePlayButtons();
   }
 
   function renderCurrent(){
     const l=activeLesson(), s=sentence(); if(!l||!s) return;
+    const conversationMode=state.mode==='conversation';
+    els.conversationActions.classList.toggle('hidden',!conversationMode);
+    els.sentenceStudyContent.classList.toggle('hidden',conversationMode);
+    if(conversationMode){ renderConversation(); return; }
     els.counter.textContent=`Sentence ${l.currentIndex+1} of ${l.sentences.length}`;
     const currentKnownCounts=knownCounts(l);
     els.knownCounter.textContent=`Known · Listening ${currentKnownCounts.listening}/${l.sentences.length} · Reading ${currentKnownCounts.reading}/${l.sentences.length} · Review ${currentKnownCounts.review}/${l.sentences.length} · Dictation ${currentKnownCounts.dictation}/${l.sentences.length}`;
@@ -1897,10 +2181,12 @@
     try{ await addLessonFromText(`Pasted lesson ${state.lessons.length+1}`,text); els.pasteBox.value=''; }
     catch(e){ alert(e.message); }
   });
+  [els.viewStudy,els.viewLessons,els.viewVocabulary,els.viewProgress,els.viewSettings].forEach(btn=>btn?.addEventListener('click',()=>{ state.view=btn.dataset.view; saveState(); render(); if(state.view==='vocabulary')setTimeout(()=>els.vocabCard.scrollIntoView({behavior:'smooth',block:'start'}),30); }));
   els.modeChinese.addEventListener('click',()=>{ stopPlayback(false); state.mode='chinese'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
   els.modeReading.addEventListener('click',()=>{ stopPlayback(false); state.mode='reading'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
   els.modeEnglish.addEventListener('click',()=>{ stopPlayback(false); state.mode='english'; beginStudyVisit(); resetTemporaryReveals(); saveState(); render(); });
   els.modeDictation.addEventListener('click',()=>{ stopPlayback(false); state.mode='dictation'; beginStudyVisit(); resetTemporaryReveals(); const l=activeLesson(); if(l && (!dictationEligible(sentence()) || isKnown(sentence(),'dictation'))){ const n=nextDictationIndex(l,0,1); if(n>=0) l.currentIndex=n; } saveState(); render(); });
+  els.modeConversation.addEventListener('click',()=>{ stopPlayback(false); state.mode='conversation'; normalizeConversation(); saveState(); render(); if(!state.conversation.promptHeard)setTimeout(()=>speakConversationPrompt(),150); });
   els.repeatCount.addEventListener('change',()=>{ state.repeatCount=Number(els.repeatCount.value); saveState(); render(); });
   els.globalGap.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; l.globalGap=els.globalGap.value==='auto'?'auto':Number(els.globalGap.value); saveState(); render(); });
   els.currentGap.addEventListener('change',()=>{ const s=sentence(); if(!s)return; s.gapOverride=els.currentGap.value==='default'?null:Number(els.currentGap.value); saveState(); render(); });
@@ -1916,6 +2202,7 @@
   els.allKnownToggle.addEventListener('change',()=>{ const l=activeLesson(); if(!l)return; const value=els.allKnownToggle.checked; l.sentences.forEach(s=>{setKnown(s,value);}); saveState(); render(); });
   els.allActive.addEventListener('click',()=>{ const l=activeLesson(); if(!l)return; l.sentences.forEach(s=>{setKnown(s,false);}); saveState(); render(); });
   els.speechRate.addEventListener('change',()=>{ state.speechRate=Number(els.speechRate.value); saveState(); });
+  els.vocabHighlightMode.addEventListener('change',()=>{ state.vocabHighlightMode=els.vocabHighlightMode.value; saveState(); renderCurrent(); renderList(); });
   els.voiceSelect.addEventListener('change',()=>{ state.voiceURI=els.voiceSelect.value; saveState(); populateVoices(); });
   els.showEnglish.addEventListener('change',()=>{ state.showEnglish=els.showEnglish.checked; saveState(); renderCurrent(); });
   els.showPinyin.addEventListener('change',()=>{ state.showPinyin=els.showPinyin.checked; saveState(); render(); });
@@ -1973,6 +2260,18 @@
   els.dictationTryAgain.addEventListener('click',()=>{ if(controller.dictationAttempts>=3||controller.dictationCorrect||controller.dictationRevealed)return; controller.dictationUserAnswer=''; els.dictationInput.value=''; els.dictationFeedback.className='dictation-feedback hidden'; els.dictationDiff.classList.add('hidden'); els.dictationDiff.innerHTML=''; renderCurrent(); setTimeout(()=>els.dictationInput.focus(),0); });
   els.dictationShowAnswer.addEventListener('click',revealDictationAnswer);
   els.dictationNext.addEventListener('click',()=>move(1));
+  els.conversationLevel.addEventListener('change',()=>{ normalizeConversation(); state.conversation.level=els.conversationLevel.value==='a2'?'a2':'a1'; newConversation(); });
+  els.conversationTopic.addEventListener('change',()=>{ normalizeConversation(); state.conversation.topic=els.conversationTopic.value; newConversation(); });
+  els.conversationNew.addEventListener('click',newConversation);
+  els.conversationListen.addEventListener('click',speakConversationPrompt);
+  els.conversationUnderstood.addEventListener('click',markConversationUnderstood);
+  els.conversationShowChinese.addEventListener('click',()=>{ normalizeConversation(); state.conversation.showChinese=!state.conversation.showChinese; if(state.conversation.showChinese)state.conversation.helpUsed=true; saveState(); renderConversation(); });
+  els.conversationShowPinyin.addEventListener('click',()=>{ normalizeConversation(); state.conversation.showPinyin=!state.conversation.showPinyin; if(state.conversation.showPinyin)state.conversation.helpUsed=true; saveState(); renderConversation(); });
+  els.conversationShowEnglish.addEventListener('click',()=>{ normalizeConversation(); state.conversation.showEnglish=!state.conversation.showEnglish; if(state.conversation.showEnglish)state.conversation.helpUsed=true; saveState(); renderConversation(); });
+  els.conversationSend.addEventListener('click',sendConversationAnswer);
+  els.conversationInput.addEventListener('keydown',ev=>{ if(ev.key==='Enter'&&(ev.ctrlKey||ev.metaKey)){ev.preventDefault();sendConversationAnswer();} });
+  els.conversationMic.addEventListener('click',startConversationMic);
+  els.conversationClear.addEventListener('click',()=>{els.conversationInput.value='';els.conversationFeedback.textContent='';});
   els.enableCounterReset.addEventListener('change',()=>{ counterResetUnlocked=els.enableCounterReset.checked; renderStudyCounters(); });
   els.resetListeningCount.addEventListener('click',()=>resetStudyMode('listening'));
   els.resetReadingCount.addEventListener('click',()=>resetStudyMode('reading'));
@@ -1984,7 +2283,7 @@
     l.listVisible = l.listVisible===false;
     saveState(); render();
   });
-  els.toggleVocab.addEventListener('click',()=>{ state.vocabOpen=!state.vocabOpen; saveState(); renderVocabulary(); if(state.vocabOpen) setTimeout(()=>els.vocabCard.scrollIntoView({behavior:'smooth',block:'start'}),30); });
+  els.toggleVocab.addEventListener('click',()=>{ state.view='vocabulary'; state.vocabOpen=true; saveState(); render(); setTimeout(()=>els.vocabCard.scrollIntoView({behavior:'smooth',block:'start'}),30); });
   els.vocabFilter.addEventListener('change',()=>{ state.vocabFilter=els.vocabFilter.value; state.vocabIndex=0; saveState(); renderVocabulary(); });
   els.vocabStatusFilter.addEventListener('change',()=>{ state.vocabStatusFilter=els.vocabStatusFilter.value; state.vocabIndex=0; saveState(); renderVocabulary(); });
   els.vocabTypeFilter.addEventListener('change',()=>{ state.vocabTypeFilter=els.vocabTypeFilter.value; state.vocabIndex=0; saveState(); renderVocabulary(); });
@@ -2020,7 +2319,10 @@
     if(!Array.isArray(state.lessons)) state.lessons=[];
     state.lessons=state.lessons.slice(0,MAX_LESSONS).map(l=>({...l,globalGap:l.globalGap==='auto'?'auto':(GAP_OPTIONS.includes(Number(l.globalGap))?Number(l.globalGap):2),currentIndex:Math.max(0,Math.min(Number(l.currentIndex)||0,(l.sentences?.length||1)-1)),listVisible:l.listVisible!==false,readingOverrideEnabled:l.readingOverrideEnabled===true,readingGeneralEnglish:l.readingGeneralEnglish===true,readingGeneralPinyin:l.readingGeneralPinyin===true,readingGeneralAuto:l.readingGeneralAuto===true,sentences:(l.sentences||[]).map(s=>{ const legacyKnown=s.known===true; const n={...s,knownListening:s.knownListening===true||legacyKnown,knownReading:s.knownReading===true||legacyKnown,knownReview:s.knownReview===true||legacyKnown,knownDictation:s.knownDictation===true,gapOverride:GAP_OPTIONS.includes(Number(s.gapOverride))?Number(s.gapOverride):null,readingShowEnglish:s.readingShowEnglish===true,readingShowPinyin:s.readingShowPinyin===true,readingAutoAdvance:s.readingAutoAdvance===true}; delete n.known; return n; })}));
     if(!state.activeId || !state.lessons.some(l=>l.id===state.activeId)) state.activeId=state.lessons[0]?.id||null;
-    state.mode=['chinese','reading','english','dictation'].includes(state.mode)?state.mode:'chinese';
+    state.mode=['chinese','reading','english','dictation','conversation'].includes(state.mode)?state.mode:'chinese';
+    state.view=['study','lessons','vocabulary','progress','settings'].includes(state.view)?state.view:'study';
+    state.vocabHighlightMode=['off','learning','new-learning'].includes(state.vocabHighlightMode)?state.vocabHighlightMode:'learning';
+    normalizeConversation();
     state.repeatCount=[1,2].includes(Number(state.repeatCount))?Number(state.repeatCount):1;
     state.speechRate=Number(state.speechRate)||1;
     state.showEnglish=state.showEnglish!==false; state.showPinyin=state.showPinyin!==false; state.randomizeVoices=state.randomizeVoices!==false; normalizeStudyHistory(); normalizeDictationHistory(); state.dictationRepeatCount=Number(state.dictationRepeatCount)===2?2:1; state.dictationLength=state.dictationLength==='short'?'short':'all'; counterResetUnlocked=false;
